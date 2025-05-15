@@ -14,18 +14,21 @@ Route::get('/dashboard', function () {
     return view('dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-# Inventory
-Route::get('/inventory', function () {
-    return view('inventory');
-})->middleware(['auth', 'verified'])->name('inventory');
+# List of inventory in Inventory page
+Route::get('/inventory', [InventoryController::class, 'index'])->middleware(['auth', 'verified'])->name('inventory');
 
 # Form for inventory
 Route::get('/itemForm', function () {
     return view('itemForm');
 })->middleware(['auth', 'verified'])->name('itemForm');
 
-Route::get('/itemForm', [InventoryController::class, 'index'])->name('itemForm');
+Route::get('/itemForm', [InventoryController::class, 'create'])->name('itemForm');
 Route::post('/itemForm', [InventoryController::class, 'store'])->name('itemForm.store');
+
+# User list page
+Route::get('/user', function () {
+    return view('user');
+})->middleware(['auth', 'verified'])->name('user');
 
 # Profile
 Route::middleware('auth')->group(function () {

@@ -8,10 +8,24 @@ use App\Models\Department;
 
 class InventoryController extends Controller
 {
-    public function index () {
+    public function index (Request $request) {
         $departments = Department::all();
 
-        return view('itemForm', compact('departments'));
+        $query = Inventory::with('department');
+
+        if ($request->filled('item_filter')) {
+            $query->where('item', 'like', '%' . $request->item_filter . '%');
+        }
+
+        if ($request->filled('department_filter')) {
+            $query->whereHas('department', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->department_filter . '%');
+            });
+        }
+
+        $inventories = $query->get();
+
+        return view('inventory', compact('departments', 'inventories'));
     }
 
     public function store (Request $request) {
@@ -26,5 +40,12 @@ class InventoryController extends Controller
         Inventory::create($validated);
 
         return redirect()->back()->with('success', 'Item has been saved!!');
+    }
+
+    public function create () {
+        $departments = Department::all();
+        $inventories = Inventory::with('department')->get();
+        
+        return view ('itemForm', compact('departments', 'inventories'));
     }
 }
