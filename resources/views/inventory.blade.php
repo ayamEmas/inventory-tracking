@@ -44,6 +44,19 @@
                                     </option>
                                 @endforeach
                             </select>
+                            <select
+                                name="year_filter"
+                                onchange="document.getElementById('filterForm').submit();"
+                                class="border border-gray-300 rounded-md px-3 py-2 w-full w-24 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
+                            <option value="">Years</option>
+                            @for ($year = 2020; $year <= 2025; $year++)
+                                <option value="{{ $year }}" {{ request('year_filter') == $year ? 'selected' : '' }}>
+                                    {{ $year }}
+                                </option>
+                            @endfor
+
+                            </select>
                         </form>
                     </div>
 
@@ -52,36 +65,37 @@
                         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
                             <thead class="bg-gray-100">
                                 <tr>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">#</th>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Year</th>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Item</th>
-                                    <th class="w-2/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Description</th>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Department</th>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Amount (RM)</th> 
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Action</th> 
+                                    <th class="w-1/12 px-4 py-2 text-left text-sm font-medium text-gray-600">#</th>
+                                    <th class="w-1/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Year</th>
+                                    <th class="w-3/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Item</th>
+                                    <th class="w-3/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Description</th>
+                                    <th class="w-2/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Department</th>
+                                    <th class="w-1/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Amount (RM)</th> 
+                                    <th class="w-1/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Action</th> 
                                 </tr>
                             </thead>
+
                             <tbody class="divide-y divide-gray-200">
                                 @forelse ($inventories as $index => $inventory)
                                 <tr>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $index + 1 }}</th>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $inventory->year }}</th>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $inventory->item }}</th>
-                                    <th class="w-2/7 px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $inventory->description }}</th>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $inventory->department->name ?? 'No Department' }}</th>
-                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">{{ number_format($inventory->amount, 2) }}</th>
-                                    <td class="w-1/7 px-4 py-2 text-sm text-gray-700">
+                                    <td class="w-1/12 px-4 py-2 text-left text-sm text-gray-600">{{ $index + 1 }}</td>
+                                    <td class="w-1/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->year }}</td>
+                                    <td class="w-3/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->item }}</td>
+                                    <td class="w-3/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->description }}</td>
+                                    <td class="w-2/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->department->name ?? 'No Department' }}</td>
+                                    <td class="w-1/12 px-4 py-2 text-left text-sm text-gray-600">{{ number_format($inventory->amount, 2) }}</td>
+                                    <td class="w-1/12 px-4 py-2 text-sm text-gray-700">
                                         <a href="{{ route('inventories.edit', $inventory->id) }}">
                                             ✏️
                                         </a>
                                     </td>
                                 </tr>
                                 @empty
-                                    <tr>
-                                        <td colspan="7" class="px-4 py-2 text-sm text-gray-500 text-center">
-                                            No inventories found.
-                                        </td>
-                                    </tr>
+                                <tr>
+                                    <td colspan="7" class="px-4 py-2 text-sm text-gray-500 text-center">
+                                        No inventories found.
+                                    </td>
+                                </tr>
                                 @endforelse
                             </tbody>
                         </table>

@@ -1,1 +1,5 @@
-<span class="text-4xl font-bold text-gray-800">Inventory</span>
+@php
+    $isLoginPage = request()->is('/');
+@endphp
+
+<img src="{{ asset('image/qul.png') }}" alt="QHSB Logo" class="{{ $isLoginPage ? 'h-16' : 'h-12' }}">

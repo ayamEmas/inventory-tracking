@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\DepartController;
 use App\Http\Controllers\InventoryController;
+use App\Http\Controllers\UserController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -28,6 +29,9 @@ Route::put('/inventory/{id}', [InventoryController::class, 'update'])->middlewar
 Route::get('/user', function () {
     return view('user');
 })->middleware(['auth', 'verified'])->name('user');
+
+#Route::get('/user', [UserController::class, 'index'])->middleware(['auth', 'verified'])->name('user');
+Route::get('/user', [UserController::class, 'index'])->name('user');
 
 # Profile
 Route::middleware('auth')->group(function () {

@@ -23,6 +23,10 @@ class InventoryController extends Controller
             });
         }
 
+        if ($request->filled('year_filter')) {
+            $query->where('year', 'like', '%' . $request->year_filter . '%');
+        }
+
         $inventories = $query->get();
 
         return view('inventory', compact('departments', 'inventories'));
