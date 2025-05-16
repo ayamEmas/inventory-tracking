@@ -10,26 +10,33 @@
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
                 <div class="p-6 text-gray-900">
 
-                    <div class="flex items-center justify-between mb-2">
+                    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
                         <h3 class="text-lg font-semibold">Record of the Inventory</h3>
-                        <a href="{{ route('itemForm') }}" class="inline-block bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700">
+                        <a href="{{ route('itemForm') }}" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700 text-center w-full sm:w-auto">
                             Add Items
                         </a>
                     </div>
 
                     <div class="mb-4">
-                        <form id="filterForm" method="GET" action="{{ route('inventory') }}" class="flex flex-wrap items-center space-x-2">
+                        <form id="filterForm" method="GET" action="{{ route('inventory') }}" class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
                             <input
                                 type="text"
                                 name="item_filter"
                                 value="{{ request('item_filter') }}"
                                 placeholder="Filter by item name"
-                                class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="border border-gray-300 rounded-md px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
-                            <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700">
+                            <button
+                                type="submit"
+                                class="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700 w-full sm:w-auto"
+                            >
                                 Filter
                             </button>
-                            <select name="department_filter" onchange="document.getElementById('filterForm').submit();" class="border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                            <select
+                                name="department_filter"
+                                onchange="document.getElementById('filterForm').submit();"
+                                class="border border-gray-300 rounded-md px-3 py-2 w-full sm:w-auto focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                            >
                                 <option value="">All Departments</option>
                                 @foreach ($departments as $department)
                                     <option value="{{ $department->name }}" {{ request('department_filter') == $department->name ? 'selected' : '' }}>
@@ -40,6 +47,7 @@
                         </form>
                     </div>
 
+                    <!-- Pc display -->
                     <div class="hidden md:block overflow-x-auto">
                         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
                             <thead class="bg-gray-100">
@@ -50,6 +58,7 @@
                                     <th class="w-2/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Description</th>
                                     <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Department</th>
                                     <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Amount (RM)</th> 
+                                    <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">Action</th> 
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-gray-200">
@@ -61,6 +70,11 @@
                                     <th class="w-2/7 px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $inventory->description }}</th>
                                     <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $inventory->department->name ?? 'No Department' }}</th>
                                     <th class="w-1/7 px-4 py-2 text-left text-sm font-medium text-gray-600">{{ number_format($inventory->amount, 2) }}</th>
+                                    <td class="w-1/7 px-4 py-2 text-sm text-gray-700">
+                                        <a href="{{ route('inventories.edit', $inventory->id) }}">
+                                            ✏️
+                                        </a>
+                                    </td>
                                 </tr>
                                 @empty
                                     <tr>
@@ -73,6 +87,47 @@
                         </table>
                     </div>
 
+                    <!-- Mobile display -->
+                    <div class="block md:hidden">
+                        @forelse ($inventories as $index => $inventory)
+                        <div x-data="{ open: false }" class="border border-gray-200 rounded-mb mb-4 shadow-sm">
+                            <div class="flex justify-between items-center px-4 py-3 bg-gray-50">
+                                <div class="text-sm font-medium text-gray-800">
+                                    {{ $index + 1 }}. {{ $inventory->item }}
+                                </div>
+                                <button @click="open = !open"
+                                        class="text-sm text-indigo-600 hover:underline focus:outline-none">
+                                    <span x-show="!open">View</span>
+                                    <span x-show="open">Hide</span>
+                                </button>
+                            </div>
+
+                            <!-- Detail section -->
+                            <div x-show="open" x-transition class="px-4 py-3 text-sm text-gray-700 bg-white border-t border-gray-200">
+                                <div><strong>Year:</strong> {{ $inventory->year }}</div>
+                                <div><strong>Item:</strong> {{ $inventory->item }}</div>
+                                <div><strong>Description:</strong> {{ $inventory->description }}</div>
+                                <div><strong>Department:</strong> {{ $inventory->department->name ?? 'No Department' }}</div>
+                                <div><strong>Amount (RM):</strong> {{ number_format($inventory->amount, 2) }}</div>
+                            </div>
+                        </div>
+                        @empty
+                            <div class="text-gray-500 text-sm text-center">
+                                No inventories found.
+                            </div>
+                        @endforelse
+                    </div>
+                    
+                    @if (session('success'))
+                        <div 
+                            x-data="{ show: true }" 
+                            x-show="show" 
+                            x-init="setTimeout(() => show = false, 3000)" 
+                            class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50"
+                        >
+                            {{ session('success') }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

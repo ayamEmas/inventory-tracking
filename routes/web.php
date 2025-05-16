@@ -18,12 +18,11 @@ Route::get('/dashboard', function () {
 Route::get('/inventory', [InventoryController::class, 'index'])->middleware(['auth', 'verified'])->name('inventory');
 
 # Form for inventory
-Route::get('/itemForm', function () {
-    return view('itemForm');
-})->middleware(['auth', 'verified'])->name('itemForm');
+Route::get('/itemForm', [InventoryController::class, 'create'])->middleware(['auth', 'verified'])->name('itemForm');
+Route::post('/itemForm', [InventoryController::class, 'store'])->middleware(['auth', 'verified'])->name('itemForm.store');
 
-Route::get('/itemForm', [InventoryController::class, 'create'])->name('itemForm');
-Route::post('/itemForm', [InventoryController::class, 'store'])->name('itemForm.store');
+Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->middleware(['auth', 'verified'])->name('inventories.edit');
+Route::put('/inventory/{id}', [InventoryController::class, 'update'])->middleware(['auth', 'verified'])->name('inventories.update');
 
 # User list page
 Route::get('/user', function () {

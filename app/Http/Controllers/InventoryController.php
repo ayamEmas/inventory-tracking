@@ -48,4 +48,26 @@ class InventoryController extends Controller
         
         return view ('itemForm', compact('departments', 'inventories'));
     }
+
+    public function edit ($id) {
+        $inventory = Inventory::findOrFail($id);
+        $departments = Department::all();
+
+        return view ('editInventory', compact('inventory', 'departments'));
+    }
+
+    public function update (Request $request, $id) {
+        $validated = $request->validate([
+            'item' => 'required|string|max:255',
+            'description' => 'required|string|max:255',
+            'year' => 'required|integer',
+            'amount' => 'required|numeric',
+            'department_id' => 'required|exists:departments,id',
+        ]);
+
+        $inventory = Inventory::findOrFail($id);
+        $inventory->update($validated);
+
+        return redirect()->route('inventory')->with('success', 'Inventory updated successfully!');
+    }
 }
