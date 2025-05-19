@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Form') }}
+            {{ __('Inventory Form') }}
         </h2>
     </x-slot>
 
@@ -16,48 +16,165 @@
                     <form method="POST" action="{{ route('itemForm.store') }}">
                         @csrf
 
-                        <!-- Item -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700" for="item">Item</label>
-                            <input type="text" name="item" id="item" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                        </div>
+                        <!-- GENERAL INFORMATION -->
+                        <div class="border border-blue-200 rounded-md p-4 mb-6">
+                            <h3 class="text-lg font-semibold mb-4 text-blue-700">General Information</h3>
 
-                        <!-- Description -->
-                        <div class="mb-4">
-                            <label class="block text-sm font-medium text-gray-700" for="description">Description</label>
-                            <input type="text" name="description" id="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                        </div>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Purchase Date -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="date">Purchase Date</label>
+                                    <input type="date" name="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
 
-                        <!-- Year, Department, and Amount -->
-                        <div class="flex space-x-4 mb-4">
-                            <!-- Year -->
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700" for="year">Year</label>
-                                <input type="number" name="year" id="year" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                            </div>
-
-                            <!-- Department -->
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700" for="department_id">Department</label>
-                                <select name="department_id" id="department_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                                    <option value="">-- Select Department --</option>
-                                    @foreach ($departments as $department)
-                                        <option value="{{ $department->id }}">{{ $department->name }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-
-                            <!-- Amount -->
-                            <div class="flex-1">
-                                <label class="block text-sm font-medium text-gray-700" for="amount">Amount (RM)</label>
-                                <input type="number" step="0.01" name="amount" id="amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                <!-- Purchase Order No -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="purchase_order_no">Purchase Order No</label>
+                                    <input type="text" name="purchase_order_no" id="purchase_order_no" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
                             </div>
                         </div>
 
-                        <!-- Submit -->
-                        <x-primary-button>
-                            Add Item
-                        </x-primary-button>
+                        <!-- SUPPLIER INFORMATION -->
+                        <div class="border border-blue-200 rounded-md p-4 mb-6">
+                            <h3 class="text-lg font-semibold mb-4 text-blue-700">Supplier Information</h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Supplier Name -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="supplier_name">Supplier Name</label>
+                                    <input type="text" name="supplier_name" id="supplier_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <!-- Email -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="supplier_email">Email</label>
+                                    <input type="email" name="supplier_email" id="supplier_email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <!-- Address -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700" for="supplier_address">Address</label>
+                                    <textarea name="supplier_address" id="supplier_address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                </div>
+
+                                <!-- Contact No -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="supplier_contactno">Contact No</label>
+                                    <input type="text" name="supplier_contactno" id="supplier_contactno" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <!-- Fax No -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="supplier_faxno">Fax No</label>
+                                    <input type="text" name="supplier_faxno" id="supplier_faxno" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- ASSET INFORMATION -->
+                        <div class="border border-blue-200 rounded-md p-4 mb-6">
+                            <h3 class="text-lg font-semibold mb-4 text-blue-700">Asset Information</h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Department -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="department_id">Asset Department</label>
+                                    <select name="department_id" id="department_id" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                        <option value="">Please select</option>
+                                        @foreach ($departments as $department)
+                                            <option value="{{ $department->id }}">{{ $department->name }}</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+
+                                <!-- Location -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="asset_location">Asset Location</label>
+                                    <input name="asset_location" id="asset_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <!-- Asset To -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="asset_to">Asset To</label>
+                                    <input name="asset_to" id="asset_to" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <!-- Asset Code -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="asset_code">Asset Code</label>
+                                    <input name="asset_code" id="asset_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <!-- Asset Category -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="asset_cat">Category</label>
+                                    <input name="asset_cat" id="asset_cat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <!-- Asset Type -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="asset_type">Asset Type</label>
+                                    <input name="asset_type" id="asset_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                                <!-- Item Location -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="item_location">Item Location</label>
+                                    <input name="item_location" id="item_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                </div>
+
+                            </div>
+                        </div>
+
+                        <!-- OTHERS INFORMATION -->
+                        <div class="border border-blue-200 rounded-md p-4 mb-6">
+                            <h3 class="text-lg font-semibold mb-4 text-blue-700">Others Informations</h3>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <!-- Asset Serial Number -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="serial_num">Asset Serial Number</label>
+                                    <input type="text" name="serial_num" id="serial_num" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+
+                                <!-- Microsoft Office -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="microsoft_office">Microsoft Office</label>
+                                    <input type="text" name="microsoft_office" id="microsoft_office" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+
+                                <!-- Tel Number -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="tel_number">Tel Number</label>
+                                    <input type="text" name="tel_number" id="tel_number" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+                                
+                                <!-- NOS -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="nos">NOS</label>
+                                    <input type="text" name="nos" id="nos" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+
+                                <!-- Amount -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="amount">Asset Value (RM)</label>
+                                    <input type="number" step="0.01" name="amount" id="amount" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+
+                                <!-- Description -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="description">Description</label>
+                                    <input type="text" name="description" id="description" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Submit Button -->
+                        <div class="flex justify-end">
+                            <x-primary-button>Add Item</x-primary-button>
+                        </div>
+
                         @if (session('success'))
                             <div 
                                 x-data="{ show: true }" 

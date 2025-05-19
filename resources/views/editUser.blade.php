@@ -13,7 +13,7 @@
                         < Cancel
                     </a>
                 </div>
-                    <form method="POST" action="{{ route('userForm.store') }}">
+                    <form method="POST" action="{{ route('users.update', $user->id) }}">
                         @csrf
                         @method('PUT')
 
@@ -61,7 +61,7 @@
 
                         <!-- Submit -->
                         <x-primary-button>
-                            Add Item
+                            Update User
                         </x-primary-button>
 
                     </form>

@@ -34,11 +34,27 @@ class InventoryController extends Controller
 
     public function store (Request $request) {
         $validated = $request->validate([
-            'item' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
-            'year' => 'required|integer',
-            'amount' => 'required|numeric',
+            'date' => 'required|date',
+            'purchase_order_no' => 'required|string|max:255',
+            'supplier_name' => 'required|string|max:255',
+            'supplier_email' => 'required|string|max:255',
+            'supplier_address' => 'required|string|max:255',
+            'supplier_contactno' => 'required|string|max:255',
+            'supplier_faxno' => 'required|string|max:255',
             'department_id' => 'required|exists:departments,id',
+            'asset_location' => 'required|string|max:255',
+            'asset_to' => 'required|string|max:255',
+            'asset_code' => 'required|string|max:255',
+            'asset_cat' => 'required|string|max:255',
+            'asset_type' => 'required|string|max:255',
+            'item_location' => 'required|string|max:255',
+            'serial_num' => 'required|string|max:255',
+            'microsoft_office' => 'required|string|max:255',
+            'tel_number' => 'required|string|max:255',
+            'nos' => 'required|string|max:255',
+            'description' => 'required|string|max:255', 
+            'amount' => 'required|numeric',
+            'item' => 'required|string|max:255',
         ]);
 
         Inventory::create($validated);
@@ -62,11 +78,27 @@ class InventoryController extends Controller
 
     public function update (Request $request, $id) {
         $validated = $request->validate([
-            'item' => 'required|string|max:255',
-            'description' => 'required|string|max:255',
-            'year' => 'required|integer',
-            'amount' => 'required|numeric',
+            'date' => 'required|date',
+            'purchase_order_no' => 'required|string|max:255',
+            'supplier_name' => 'required|string|max:255',
+            'supplier_email' => 'required|string|max:255',
+            'supplier_address' => 'required|string|max:255',
+            'supplier_contactno' => 'required|string|max:255',
+            'supplier_faxno' => 'required|string|max:255',
             'department_id' => 'required|exists:departments,id',
+            'asset_location' => 'required|string|max:255',
+            'asset_to' => 'required|string|max:255',
+            'asset_code' => 'required|string|max:255',
+            'asset_cat' => 'required|string|max:255',
+            'asset_type' => 'required|string|max:255',
+            'item_location' => 'required|string|max:255',
+            'serial_num' => 'required|string|max:255',
+            'microsoft_office' => 'required|string|max:255',
+            'tel_number' => 'required|string|max:255',
+            'nos' => 'required|string|max:255',
+            'description' => 'required|string|max:255', 
+            'amount' => 'required|numeric',
+            'item' => 'required|string|max:255',
         ]);
 
         $inventory = Inventory::findOrFail($id);

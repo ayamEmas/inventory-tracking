@@ -50,7 +50,7 @@ class UserController extends Controller
     public function update (Request $request, $id) {
         $validated = $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email',
+            'email' => 'required|email|unique:users,email,' . $id,
             'role' => 'required|string',
             'department_id' => 'required|exists:departments,id',
             'password' => 'required|string|min:8',

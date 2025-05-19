@@ -8,7 +8,7 @@ class Inventory extends Model
 {
     protected $table = 'inventories';
     
-    protected $fillable = ['item', 'year', 'description', 'amount', 'department_id'];
+    protected $fillable = ['item', 'date', 'description', 'amount', 'department_id'];
 
     public function department()
     {
