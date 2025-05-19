@@ -47,7 +47,7 @@
                             <select
                                 name="year_filter"
                                 onchange="document.getElementById('filterForm').submit();"
-                                class="border border-gray-300 rounded-md px-3 py-2 w-full w-24 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                                class="border border-gray-300 rounded-md px-3 py-2 w-full sm:w-24 focus:outline-none focus:ring-2 focus:ring-indigo-500"
                             >
                             <option value="">Years</option>
                             @for ($year = 2020; $year <= 2025; $year++)
@@ -71,7 +71,7 @@
                                     <th class="w-3/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Description</th>
                                     <th class="w-2/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Department</th>
                                     <th class="w-1/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Amount (RM)</th> 
-                                    <th class="w-1/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Action</th> 
+                                    <th class="w-1/12 px-4 py-2 text-sm text-sm font-medium text-gray-600 text-center">Action</th> 
                                 </tr>
                             </thead>
 
@@ -84,7 +84,7 @@
                                     <td class="w-3/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->description }}</td>
                                     <td class="w-2/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->department->name ?? 'No Department' }}</td>
                                     <td class="w-1/12 px-4 py-2 text-left text-sm text-gray-600">{{ number_format($inventory->amount, 2) }}</td>
-                                    <td class="w-1/12 px-4 py-2 text-sm text-gray-700">
+                                    <td class="w-1/12 px-4 py-2 text-sm text-gray-600 text-center">
                                         <a href="{{ route('inventories.edit', $inventory->id) }}">
                                             ✏️
                                         </a>

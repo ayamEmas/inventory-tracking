@@ -11,8 +11,8 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">User Record</h3>
-                        <a href=" " class="inline-block bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700">
-                            Add Staff
+                        <a href="{{ route('userForm') }}" class="inline-block bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700">
+                            Add User
                         </a>
                     </div>
 
@@ -37,7 +37,11 @@
                                         <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $user->email }}</th>
                                         <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $user->department->name ?? 'No Department' }}</th>
                                         <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $user->role }}</th>
-                                        <th class="px-4 py-2 text-sm font-medium text-gray-600 text-center">Action</th>
+                                        <th class="px-4 py-2 text-sm font-medium text-gray-600 text-center">
+                                            <a href="{{ route('users.edit', $user->id) }}">
+                                                ✏️
+                                            </a>
+                                        </th>
                                     </tr>
                                 @empty
                                     <tr>
@@ -49,7 +53,17 @@
                             </tbody>
                         </table>
                     </div>
-
+                        
+                    @if (session('success'))
+                        <div 
+                            x-data="{ show: true }" 
+                            x-show="show" 
+                            x-init="setTimeout(() => show = false, 3000)" 
+                            class="fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 bg-green-500 text-white px-6 py-3 rounded shadow-lg z-50"
+                        >
+                            {{ session('success') }}
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

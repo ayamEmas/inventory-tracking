@@ -26,12 +26,15 @@ Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->middle
 Route::put('/inventory/{id}', [InventoryController::class, 'update'])->middleware(['auth', 'verified'])->name('inventories.update');
 
 # User list page
-Route::get('/user', function () {
-    return view('user');
-})->middleware(['auth', 'verified'])->name('user');
+Route::get('/user', [UserController::class, 'index'])->middleware(['auth', 'verified'])->name('user');
 
-#Route::get('/user', [UserController::class, 'index'])->middleware(['auth', 'verified'])->name('user');
-Route::get('/user', [UserController::class, 'index'])->name('user');
+# User form page and add function
+Route::get('/userForm', [UserController::class, 'create'])->middleware(['auth', 'verified'])->name('userForm');
+Route::post('/userForm', [UserController::class, 'store'])->middleware(['auth', 'verified'])->name('userForm.store');
+
+# Update user page and edit function
+Route::get('/user/{id}/edit', [UserController::class, 'edit'])->middleware(['auth', 'verified'])->name('users.edit');
+Route::put('/user/{id}', [UserController::class, 'update'])->middleware(['auth', 'verified'])->name('users.update');
 
 # Profile
 Route::middleware('auth')->group(function () {
