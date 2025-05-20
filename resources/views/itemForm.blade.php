@@ -17,64 +17,64 @@
                         @csrf
 
                         <!-- GENERAL INFORMATION -->
-                        <div class="border border-blue-200 rounded-md p-4 mb-6">
-                            <h3 class="text-lg font-semibold mb-4 text-blue-700">General Information</h3>
+                        <div class="border border-black-200 rounded-md p-4 mb-6">
+                            <h3 class="text-lg font-bold mb-4 text-black-700">General Information</h3>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Purchase Date -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="date">Purchase Date</label>
-                                    <input type="date" name="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="date" name="date" id="date" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                                 <!-- Purchase Order No -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="purchase_order_no">Purchase Order No</label>
-                                    <input type="text" name="purchase_order_no" id="purchase_order_no" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="text" name="purchase_order_no" id="purchase_order_no" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
                             </div>
                         </div>
 
                         <!-- SUPPLIER INFORMATION -->
-                        <div class="border border-blue-200 rounded-md p-4 mb-6">
-                            <h3 class="text-lg font-semibold mb-4 text-blue-700">Supplier Information</h3>
+                        <div class="border border-black-200 rounded-md p-4 mb-6">
+                            <h3 class="text-lg font-bold mb-4 text-black-700">Supplier Information</h3>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Supplier Name -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="supplier_name">Supplier Name</label>
-                                    <input type="text" name="supplier_name" id="supplier_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="text" name="supplier_name" id="supplier_name" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                                 <!-- Email -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="supplier_email">Email</label>
-                                    <input type="email" name="supplier_email" id="supplier_email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="email" name="supplier_email" id="supplier_email" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                                 <!-- Address -->
                                 <div class="md:col-span-2">
                                     <label class="block text-sm font-medium text-gray-700" for="supplier_address">Address</label>
-                                    <textarea name="supplier_address" id="supplier_address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500"></textarea>
+                                    <textarea name="supplier_address" id="supplier_address" rows="3" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required></textarea>
                                 </div>
 
                                 <!-- Contact No -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="supplier_contactno">Contact No</label>
-                                    <input type="text" name="supplier_contactno" id="supplier_contactno" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="text" name="supplier_contactno" id="supplier_contactno" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                                 <!-- Fax No -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="supplier_faxno">Fax No</label>
-                                    <input type="text" name="supplier_faxno" id="supplier_faxno" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input type="text" name="supplier_faxno" id="supplier_faxno" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
                             </div>
                         </div>
 
                         <!-- ASSET INFORMATION -->
-                        <div class="border border-blue-200 rounded-md p-4 mb-6">
-                            <h3 class="text-lg font-semibold mb-4 text-blue-700">Asset Information</h3>
+                        <div class="border border-black-200 rounded-md p-4 mb-6">
+                            <h3 class="text-lg font-bold mb-4 text-black-700">Asset Information</h3>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Department -->
@@ -91,45 +91,51 @@
                                 <!-- Location -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="asset_location">Asset Location</label>
-                                    <input name="asset_location" id="asset_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input name="asset_location" id="asset_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                                 <!-- Asset To -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="asset_to">Asset To</label>
-                                    <input name="asset_to" id="asset_to" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input name="asset_to" id="asset_to" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                                 <!-- Asset Code -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="asset_code">Asset Code</label>
-                                    <input name="asset_code" id="asset_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input name="asset_code" id="asset_code" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                                 <!-- Asset Category -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="asset_cat">Category</label>
-                                    <input name="asset_cat" id="asset_cat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input name="asset_cat" id="asset_cat" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                                 <!-- Asset Type -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="asset_type">Asset Type</label>
-                                    <input name="asset_type" id="asset_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input name="asset_type" id="asset_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                                 <!-- Item Location -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="item_location">Item Location</label>
-                                    <input name="item_location" id="item_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500">
+                                    <input name="item_location" id="item_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
+
+                                <!-- Item -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="item">Item</label>
+                                    <input name="item" id="item" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
                             </div>
                         </div>
 
                         <!-- OTHERS INFORMATION -->
-                        <div class="border border-blue-200 rounded-md p-4 mb-6">
-                            <h3 class="text-lg font-semibold mb-4 text-blue-700">Others Informations</h3>
+                        <div class="border border-black-200 rounded-md p-4 mb-6">
+                            <h3 class="text-lg font-bold mb-4 text-black-700">Others Informations</h3>
 
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <!-- Asset Serial Number -->

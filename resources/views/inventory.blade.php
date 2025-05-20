@@ -65,26 +65,24 @@
                         <table class="min-w-full divide-y divide-gray-200 border border-gray-300">
                             <thead class="bg-gray-100">
                                 <tr>
-                                    <th class="w-1/12 px-4 py-2 text-left text-sm font-medium text-gray-600">#</th>
-                                    <th class="w-1/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Year</th>
-                                    <th class="w-3/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Item</th>
-                                    <th class="w-3/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Description</th>
-                                    <th class="w-2/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Department</th>
-                                    <th class="w-1/12 px-4 py-2 text-left text-sm font-medium text-gray-600">Amount (RM)</th> 
-                                    <th class="w-1/12 px-4 py-2 text-sm text-sm font-medium text-gray-600 text-center">Action</th> 
+                                    <th class="w-1/10 px-4 py-2 text-left text-sm font-medium text-gray-600">#</th>
+                                    <th class="w-2/10 px-4 py-2 text-left text-sm font-medium text-gray-600">Date</th>
+                                    <th class="w-3/10 px-4 py-2 text-left text-sm font-medium text-gray-600">Item</th>
+                                    <th class="w-2/10 px-4 py-2 text-left text-sm font-medium text-gray-600">Department</th>
+                                    <th class="w-1/10 px-4 py-2 text-left text-sm font-medium text-gray-600">Amount (RM)</th> 
+                                    <th class="w-1/10 px-4 py-2 text-sm text-sm font-medium text-gray-600 text-center">Action</th> 
                                 </tr>
                             </thead>
 
                             <tbody class="divide-y divide-gray-200">
                                 @forelse ($inventories as $index => $inventory)
                                 <tr>
-                                    <td class="w-1/12 px-4 py-2 text-left text-sm text-gray-600">{{ $index + 1 }}</td>
-                                    <td class="w-1/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->year }}</td>
-                                    <td class="w-3/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->item }}</td>
-                                    <td class="w-3/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->description }}</td>
-                                    <td class="w-2/12 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->department->name ?? 'No Department' }}</td>
-                                    <td class="w-1/12 px-4 py-2 text-left text-sm text-gray-600">{{ number_format($inventory->amount, 2) }}</td>
-                                    <td class="w-1/12 px-4 py-2 text-sm text-gray-600 text-center">
+                                    <td class="w-1/10 px-4 py-2 text-left text-sm text-gray-600">{{ $index + 1 }}</td>
+                                    <td class="w-2/10 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->date }}</td>
+                                    <td class="w-3/10 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->item }}</td>
+                                    <td class="w-2/10 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->department->name ?? 'No Department' }}</td>
+                                    <td class="w-1/10 px-4 py-2 text-left text-sm text-gray-600">{{ number_format($inventory->amount, 2) }}</td>
+                                    <td class="w-1/10 px-4 py-2 text-sm text-gray-600 text-center">
                                         <a href="{{ route('inventories.edit', $inventory->id) }}">
                                             ✏️
                                         </a>
