@@ -118,18 +118,17 @@
                                     <input name="asset_type" id="asset_type" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
-                                <!-- Item Location -->
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-700" for="item_location">Item Location</label>
-                                    <input name="item_location" id="item_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
-                                </div>
-
                                 <!-- Item -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700" for="item">Item</label>
                                     <input name="item" id="item" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
                                 </div>
 
+                                <!-- Item Location -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700" for="item_location">Item Location</label>
+                                    <input name="item_location" id="item_location" class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:ring-indigo-500 focus:border-indigo-500" required>
+                                </div>
                             </div>
                         </div>
 
