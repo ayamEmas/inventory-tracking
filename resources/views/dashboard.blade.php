@@ -11,12 +11,9 @@
             <div class="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
 
                 <!-- Staff Table -->
-                <div class="md:w-1/2 bg-white p-6 shadow-sm sm:rounded-lg">
+                <a href="{{ route('user') }}" class="block md:w-1/2 bg-white p-6 shadow-sm sm:rounded-lg hover:shadow-md transition-shadow duration-200">
                     <div class="flex justify-between items-center mb-4">
                         <h3 class="text-lg font-semibold text-gray-800">User List</h3>
-                        <a href="{{ route('user') }}" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700">
-                            User Details >
-                        </a>
                     </div>
                     <div class="overflow-y-auto" style="max-height: 250px;">
                         <table class="min-w-full divide-y divide-gray-200 border border-gray-300 text-sm">
@@ -42,7 +39,7 @@
                             </tbody>
                         </table>
                     </div>
-                </div>
+                </a>
 
                 <!-- Second Column -->
                 <div class="md:w-1/2 bg-white p-6 shadow-sm sm:rounded-lg">
