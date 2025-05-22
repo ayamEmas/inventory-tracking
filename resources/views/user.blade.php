@@ -11,13 +11,13 @@
                 <div class="p-6 text-gray-900">
                     <div class="flex items-center justify-between mb-4">
                         <h3 class="text-lg font-semibold">User Record</h3>
-                        <a href="{{ route('userForm') }}" class="inline-block bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700">
+                        <a href="{{ route('userForm') }}" class="bg-black text-white text-sm px-4 py-2 rounded-md hover:bg-gray-800 text-center w-full sm:w-auto">
                             Add User
                         </a>
                     </div>
 
                     <div class="mb-4">
-                        <form id="filterForm" method="GET" action="{{ route('user') }}" class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
+                        <form id="filterForm" method="GET" action="{{ route('inventory') }}" class="flex flex-col sm:flex-row sm:flex-wrap gap-2">
                             <select
                                 name="department_filter"
                                 onchange="document.getElementById('filterForm').submit();"
