@@ -14,16 +14,16 @@
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
-    <body class="min-h-screen flex items-center justify-start font-sans bg-cover bg-center bg-no-repeat" style="background-image: url('/image/bg.jpg');">
-        <div class="flex items-center w-full">
-            <div class="ml-32 text-white">
-                <h1 class="text-8xl font-bold mb-6">Welcome to</h1>
-                <h2 class="text-7xl font-semibold">Inventory System</h2>
+    <body class="min-h-screen flex flex-col md:flex-row items-center justify-center font-sans bg-cover bg-center bg-no-repeat" style="background-image: url('/image/bg.jpg');">
+        <div class="flex flex-col md:flex-row items-center w-full px-4 md:px-0">
+            <div class="text-center md:text-left md:ml-32 text-white mb-8 md:mb-0">
+                <h1 class="text-4xl md:text-8xl font-bold mb-4 md:mb-6">Welcome to</h1>
+                <h2 class="text-3xl md:text-7xl font-semibold">Inventory Systems</h2>
             </div>
-            <div class="w-full max-w-md p-6 bg-white rounded-xl shadow-xl ml-60">
+            <div class="w-full max-w-md p-6 bg-white rounded-xl shadow-xl md:ml-60">
                 <div class="flex justify-center mb-4">
                     <a href="/">
-                        <x-application-logo class="w-20 h-20 fill-current text-gray-500" />
+                        <x-application-logo class="w-16 h-16 md:w-20 md:h-20 fill-current text-gray-500" />
                     </a>
                 </div>
                 {{ $slot }}

@@ -37,9 +37,11 @@
                                         <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $user->email }}</th>
                                         <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $user->department->name ?? 'No Department' }}</th>
                                         <th class="px-4 py-2 text-left text-sm font-medium text-gray-600">{{ $user->role }}</th>
-                                        <th class="px-4 py-2 text-sm font-medium text-gray-600 text-center">
-                                            <a href="{{ route('users.edit', $user->id) }}">
-                                                ✏️
+                                        <th class="w-1/10 px-4 py-2 text-sm text-gray-600 text-center hover:">
+                                            <a href="{{ route('users.edit', $user->id) }}" class="inline-block transform hover:-translate-y-1 transition-transform duration-200">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
                                             </a>
                                         </th>
                                     </tr>
