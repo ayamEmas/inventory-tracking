@@ -57,9 +57,11 @@
                         </div>
 
                         <!-- Submit -->
-                        <x-primary-button>
-                            Add User
-                        </x-primary-button>
+                        <div class="flex justify-end">
+                            <x-primary-button>
+                                Add User
+                            </x-primary-button>
+                        </div>
                         @if (session('success'))
                             <div 
                                 x-data="{ show: true }" 

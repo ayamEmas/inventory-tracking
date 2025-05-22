@@ -9,10 +9,19 @@ use App\Models\User;
 
 class UserController extends Controller
 {
-    public function index () {
-        $users = User::with('department')->get();
+    public function index (Request $request) {
+        $query = User::with('department');
+        $departments = Department::all();
 
-        return view('user', compact('users'));
+        if ($request->filled('department_filter')) {
+            $query->whereHas('department', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->department_filter . '%');
+            });
+        }
+
+        $users = $query->get();
+
+        return view('user', compact('users', 'departments'));
     }
 
     public function store (Request $request) {
@@ -60,5 +69,12 @@ class UserController extends Controller
         $user->update($validated);
 
         return redirect()->route('user')->with('success', 'User data updated successfully!');
+    }
+
+    public function destroy ($id) {
+        $user = User::findOrFail($id);
+        $user->delete();
+
+        return redirect()->route('user')->with('success', 'User deleted successfully!');
     }
 }

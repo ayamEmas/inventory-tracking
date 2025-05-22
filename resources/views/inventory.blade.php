@@ -12,7 +12,7 @@
 
                     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between mb-4 gap-2">
                         <h3 class="text-lg font-semibold">Record of the Inventory</h3>
-                        <a href="{{ route('itemForm') }}" class="bg-indigo-600 text-white text-sm px-4 py-2 rounded-md hover:bg-indigo-700 text-center w-full sm:w-auto">
+                        <a href="{{ route('itemForm') }}" class="bg-black text-white text-sm px-4 py-2 rounded-md hover:bg-gray-800 text-center w-full sm:w-auto">
                             Add Items
                         </a>
                     </div>
@@ -82,12 +82,29 @@
                                     <td class="w-3/10 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->item }}</td>
                                     <td class="w-2/10 px-4 py-2 text-left text-sm text-gray-600">{{ $inventory->department->name ?? 'No Department' }}</td>
                                     <td class="w-1/10 px-4 py-2 text-left text-sm text-gray-600">{{ number_format($inventory->amount, 2) }}</td>
-                                    <td class="w-1/10 px-4 py-2 text-sm text-gray-600 text-center hover:">
-                                        <a href="{{ route('inventories.edit', $inventory->id) }}" class="inline-block transform hover:-translate-y-1 transition-transform duration-200">
-                                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
-                                            </svg>
-                                        </a>
+                                    <td class="w-1/10 px-4 py-2 text-sm text-gray-600 text-center">
+                                        <div class="flex justify-center space-x-2">
+                                            <a href="{{ route('inventories.edit', $inventory->id) }}" class="inline-block transform hover:-translate-y-1 transition-transform duration-200 group relative">
+                                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                                </svg>
+                                                <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                                                    Edit
+                                                </span>
+                                            </a>
+                                            <form action="{{ route('inventories.destroy', $inventory->id) }}" method="POST" class="inline">
+                                                @csrf
+                                                @method('DELETE')
+                                                <button type="submit" class="inline-block transform hover:-translate-y-1 transition-transform duration-200 group relative" onclick="return confirm('Are you sure you want to delete this item?')">
+                                                    <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                                    </svg>
+                                                    <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-200 whitespace-nowrap">
+                                                        Delete
+                                                    </span>
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                                 @empty
