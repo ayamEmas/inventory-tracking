@@ -13,20 +13,19 @@
         </div>
     </x-slot>
 
-    <div class="py-12 space-y-10">
+    <div class="py-12 space-y-6">
         <!-- Count Boxes -->
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                 <!-- Inventory Count Box -->
-                <div class="md:w-1/2 bg-white/90 backdrop-blur-sm p-8 shadow-lg sm:rounded-xl border border-gray-100 animate-fade-in-up delay-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
+                <div class="bg-white/90 backdrop-blur-sm p-6 shadow-lg rounded-xl border border-gray-100 animate-fade-in-up delay-200 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600 mb-1">Total Inventories</p>
-                            <p class="text-4xl font-bold text-gray-900">{{ $inventories->count() }}</p>
-                            <p class="text-sm text-gray-500 mt-2">Manage your inventory items</p>
+                            <p class="text-sm font-medium text-gray-600">Total Inventories</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $inventories->count() }}</p>
                         </div>
-                        <div class="p-4 bg-indigo-100 rounded-2xl group-hover:bg-indigo-200 transition-colors duration-300">
-                            <svg class="w-10 h-10 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="p-3 bg-indigo-100 rounded-xl group-hover:bg-indigo-200 transition-colors duration-300">
+                            <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                         </div>
@@ -34,19 +33,77 @@
                 </div>
 
                 <!-- User Count Box -->
-                <div class="md:w-1/2 bg-white/90 backdrop-blur-sm p-8 shadow-lg sm:rounded-xl border border-gray-100 animate-fade-in-up delay-400 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
+                <div class="bg-white/90 backdrop-blur-sm p-6 shadow-lg rounded-xl border border-gray-100 animate-fade-in-up delay-300 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600 mb-1">Total Users</p>
-                            <p class="text-4xl font-bold text-gray-900">{{ $users->count() }}</p>
-                            <p class="text-sm text-gray-500 mt-2">Manage your staff members</p>
+                            <p class="text-sm font-medium text-gray-600">Total Users</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->count() }}</p>
                         </div>
-                        <div class="p-4 bg-green-100 rounded-2xl group-hover:bg-green-200 transition-colors duration-300">
-                            <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="p-3 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors duration-300">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                         </div>
                     </div>
+                </div>
+
+                <!-- Department Count Box -->
+                <div class="bg-white/90 backdrop-blur-sm p-6 shadow-lg rounded-xl border border-gray-100 animate-fade-in-up delay-400 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Departments</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1">{{ $departmentDistribution->count() }}</p>
+                        </div>
+                        <div class="p-3 bg-purple-100 rounded-xl group-hover:bg-purple-200 transition-colors duration-300">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Total Value Box -->
+                <div class="bg-white/90 backdrop-blur-sm p-6 shadow-lg rounded-xl border border-gray-100 animate-fade-in-up delay-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-gray-600">Total Value Asset</p>
+                            <p class="text-3xl font-bold text-gray-900 mt-1">RM {{ number_format($inventories->sum('amount'), 2) }}</p>
+                        </div>
+                        <div class="p-3 bg-blue-100 rounded-xl group-hover:bg-blue-200 transition-colors duration-300">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Department Distribution -->
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
+            <div class="bg-white/90 backdrop-blur-sm p-6 shadow-lg rounded-xl animate-fade-in-up delay-600 border border-gray-100">
+                <div class="flex items-center gap-2 mb-4">
+                    <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                    </svg>
+                    <h3 class="text-lg font-semibold text-gray-800">Department Distribution</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    @foreach($departmentDistribution as $department)
+                        <div class="bg-gray-50/50 rounded-lg p-4">
+                            <div class="flex items-center justify-between mb-2">
+                                <div class="flex items-center gap-2">
+                                    <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
+                                    <span class="text-sm font-medium text-gray-700">{{ $department['name'] }}</span>
+                                </div>
+                                <span class="text-sm font-medium text-gray-900">{{ $department['percentage'] }}%</span>
+                            </div>
+                            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                                <div class="bg-indigo-500 h-1.5 rounded-full" style="width: {{ $department['percentage'] }}%"></div>
+                            </div>
+                            <p class="text-xs text-gray-500 mt-1">{{ $department['count'] }} items</p>
+                        </div>
+                    @endforeach
                 </div>
             </div>
         </div>

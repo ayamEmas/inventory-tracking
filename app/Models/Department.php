@@ -8,7 +8,7 @@ class Department extends Model
 {
     protected $fillable = ['name'];
 
-    public function inventory() {
+    public function inventories() {
         return $this->hasMany(Inventory::class);
     }
 

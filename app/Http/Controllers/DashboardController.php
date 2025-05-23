@@ -4,7 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Inventory;
+use App\Models\Department;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -12,6 +14,20 @@ class DashboardController extends Controller
     {
         $users = User::with('department')->get();
         $inventories = Inventory::with('department')->get();
-        return view('dashboard', compact('users', 'inventories'));
+        
+        // Calculate department distribution
+        $departmentDistribution = Department::withCount('inventories')
+            ->get()
+            ->map(function ($department) use ($inventories) {
+                $total = $inventories->count();
+                $percentage = $total > 0 ? round(($department->inventories_count / $total) * 100) : 0;
+                return [
+                    'name' => $department->name,
+                    'count' => $department->inventories_count,
+                    'percentage' => $percentage
+                ];
+            });
+
+        return view('dashboard', compact('users', 'inventories', 'departmentDistribution'));
     }
 } 
