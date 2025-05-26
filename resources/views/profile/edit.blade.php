@@ -43,7 +43,7 @@
                 </div>
             </div>
 
-            <!-- Delete Account -->
+            <!-- Delete Account 
             <div x-data="{ show: false }" 
                  x-init="setTimeout(() => show = true, 600)"
                  x-show="show"
@@ -54,7 +54,7 @@
                 <div class="max-w-xl">
                     @include('profile.partials.delete-user-form')
                 </div>
-            </div>
+            </div>-->
         </div>
     </div>
 
