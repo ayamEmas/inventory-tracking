@@ -35,6 +35,10 @@ Route::post('/userForm', [UserController::class, 'store'])->middleware(['auth', 
 Route::get('/user/{id}/edit', [UserController::class, 'edit'])->middleware(['auth', 'verified'])->name('users.edit');
 Route::put('/user/{id}', [UserController::class, 'update'])->middleware(['auth', 'verified'])->name('users.update');
 Route::delete('/user/{id}', [UserController::class, 'destroy'])->middleware(['auth', 'verified'])->name('users.destroy');
+
+Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
+Route::post('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('stop.impersonating');
+
 # Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

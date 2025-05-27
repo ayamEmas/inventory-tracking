@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use App\Models\Department;
 use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class UserController extends Controller
 {
@@ -76,5 +77,39 @@ class UserController extends Controller
         $user->delete();
 
         return redirect()->route('user')->with('success', 'User deleted successfully!');
+    }
+
+    public function impersonate(User $user)
+    {
+        // Check if the current user is an IT Admin
+        if (auth()->user()->department->name !== 'Information Technology' || auth()->user()->role !== 'Admin') {
+            abort(403, 'Unauthorized action.');
+        }
+
+        // Store the original user's ID in the session
+        session()->put('impersonator_id', auth()->id());
+
+        // Login as the target user
+        Auth::login($user);
+
+        return redirect()->route('dashboard')->with('success', 'You are now impersonating ' . $user->name);
+    }
+
+    public function stopImpersonating()
+    {
+        if (!session()->has('impersonator_id')) {
+            return redirect()->route('dashboard');
+        }
+
+        // Get the original user
+        $originalUser = User::find(session()->get('impersonator_id'));
+
+        // Clear the impersonation session
+        session()->forget('impersonator_id');
+
+        // Login as the original user
+        Auth::login($originalUser);
+
+        return redirect()->route('dashboard')->with('success', 'Stopped impersonating user');
     }
 }

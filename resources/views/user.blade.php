@@ -89,6 +89,19 @@
                                         <td class="px-6 py-4 text-left text-sm text-gray-600">{{ $user->role }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-600 text-center">
                                             <div class="flex justify-center space-x-3">
+                                                @if(auth()->user()->department->name === 'Information Technology' && auth()->user()->role === 'Admin')
+                                                <form action="{{ route('users.impersonate', $user->id) }}" method="POST" class="inline">
+                                                    @csrf
+                                                    <button type="submit" class="inline-block transform hover:-translate-y-1 transition-transform duration-300 group relative">
+                                                        <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                                        </svg>
+                                                        <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                                                            Login as User
+                                                        </span>
+                                                    </button>
+                                                </form>
+                                                @endif
                                                 <a href="{{ route('users.edit', $user->id) }}" class="inline-block transform hover:-translate-y-1 transition-transform duration-300 group relative">
                                                     <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
