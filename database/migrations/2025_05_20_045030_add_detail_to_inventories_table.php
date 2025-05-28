@@ -28,6 +28,7 @@ return new class extends Migration
             $table->string('microsoft_office')->nullable();
             $table->string('tel_number')->nullable();
             $table->string('nos')->nullable();
+            $table->string('id_tag')->nullable();
         });
     }
 
@@ -54,6 +55,7 @@ return new class extends Migration
                 'microsoft_office',
                 'tel_number',
                 'nos',
+                'id_tag',
             ]);
         });
     }

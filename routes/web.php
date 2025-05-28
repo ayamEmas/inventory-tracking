@@ -24,6 +24,9 @@ Route::post('/itemForm', [InventoryController::class, 'store'])->middleware(['au
 Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->middleware(['auth', 'verified'])->name('inventories.edit');
 Route::put('/inventory/{id}', [InventoryController::class, 'update'])->middleware(['auth', 'verified'])->name('inventories.update');
 Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->middleware(['auth', 'verified'])->name('inventories.destroy');
+
+Route::get('/inventories/{id}/download-qr', [InventoryController::class, 'downloadQr'])->name('inventories.download-qr');
+
 # User list page
 Route::get('/user', [UserController::class, 'index'])->middleware(['auth', 'verified'])->name('user');
 
