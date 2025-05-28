@@ -163,7 +163,7 @@ class InventoryController extends Controller
     public function downloadQr($id)
     {
         $inventory = Inventory::findOrFail($id);
-        $url = route('inventories.edit', $inventory->id);
+        $url = route('inventories.download-single-pdf', $inventory->id);
 
         $qrCode = QrCode::create($url)
             ->setEncoding(new Encoding('UTF-8'))
@@ -177,11 +177,12 @@ class InventoryController extends Controller
         $writer = new PngWriter();
         $result = $writer->write($qrCode);
 
-        $filename = 'qr-' . $inventory->id_tag . '.png';
+        // Replace slashes with hyphens in the filename
+        $filename = str_replace(['/', '\\'], '-', $inventory->id_tag);
         
         return response($result->getString())
             ->header('Content-Type', 'image/png')
-            ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+            ->header('Content-Disposition', 'attachment; filename="qr-' . $filename . '.png"');
     }
 
     public function downloadPdf(Request $request)
@@ -255,7 +256,7 @@ class InventoryController extends Controller
     public function downloadSinglePdf($id)
     {
         $inventory = Inventory::with('department')->findOrFail($id);
-        $url = route('inventories.edit', $inventory->id);
+        $url = route('inventories.download-single-pdf', $inventory->id);
 
         $qrCode = QrCode::create($url)
             ->setEncoding(new Encoding('UTF-8'))
@@ -276,6 +277,8 @@ class InventoryController extends Controller
             'qrCode' => $qrCodeString
         ]);
 
-        return $pdf->download('inventory-' . $inventory->id_tag . '.pdf');
+        // Replace slashes with hyphens in the filename
+        $filename = str_replace(['/', '\\'], '-', $inventory->id_tag);
+        return $pdf->download('inventory-' . $filename . '.pdf');
     }
 }

@@ -2,172 +2,191 @@
 <html>
 <head>
     <meta charset="utf-8">
-    <title>Inventory Details</title>
+    <title>Inventory Item Details</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            line-height: 1.6;
-            color: #333;
+            font-size: 12px;
+            line-height: 1.4;
         }
         .header {
             text-align: center;
-            margin-bottom: 30px;
+            margin-bottom: 20px;
             border-bottom: 2px solid #333;
             padding-bottom: 10px;
+        }
+        .header h1 {
+            font-size: 18px;
+            margin: 0;
+            color: #333;
+        }
+        .header p {
+            font-size: 12px;
+            color: #666;
+            margin: 5px 0 0 0;
         }
         .section {
             margin-bottom: 20px;
         }
         .section-title {
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
-            color:rgb(0, 0, 0);
+            color: #333;
             margin-bottom: 10px;
-            border-bottom: 1px solid #e2e8f0;
+            border-bottom: 1px solid #ddd;
             padding-bottom: 5px;
         }
-        .grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 10px;
-        }
-        .field {
-            margin-bottom: 8px;
-        }
-        .label {
-            font-weight: bold;
-            color:rgb(37, 95, 194);
-        }
-        .value {
-            color: #2d3748;
-        }
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-            font-size: 12px;
-            color: #718096;
-        }
-        .qr-code {
-            text-align: center;
+        .item-details {
             margin: 20px 0;
+        }
+        .item-details table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        .item-details th, .item-details td {
+            border: 1px solid #ddd;
+            padding: 8px;
+            text-align: left;
+        }
+        .item-details th {
+            background-color: #f8f9fa;
+            font-weight: bold;
+            width: 30%;
+        }
+        
+        .footer {
+            margin-top: 20px;
+            text-align: center;
+            font-size: 11px;
+            color: #666;
+            border-top: 1px solid #ddd;
+            padding-top: 10px;
         }
     </style>
 </head>
 <body>
     <div class="header">
-        <h1>Inventory Details</h1>
+        <h1>Inventory Item Details</h1>
         <p>Generated on: {{ $date }}</p>
     </div>
 
     <div class="section">
         <div class="section-title">General Information</div>
-        <div class="grid">
-            <div class="field">
-                <span class="label">ID Tag:</span>
-                <span class="value">{{ $inventory->id_tag }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Purchase Date:</span>
-                <span class="value">{{ $inventory->date }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Purchase Order No:</span>
-                <span class="value">{{ $inventory->purchase_order_no }}</span>
-            </div>
+        <div class="item-details">
+            <table>
+                <tr>
+                    <th>ID Tag</th>
+                    <td>{{ $inventory->id_tag }}</td>
+                </tr>
+                <tr>
+                    <th>Date</th>
+                    <td>{{ $inventory->date ?? 'No Date' }}</td>
+                </tr>
+                <tr>
+                    <th>Purchase Order No</th>
+                    <td>{{ $inventory->purchase_order_no }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 
     <div class="section">
         <div class="section-title">Supplier Information</div>
-        <div class="grid">
-            <div class="field">
-                <span class="label">Supplier Name:</span>
-                <span class="value">{{ $inventory->supplier_name }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Email:</span>
-                <span class="value">{{ $inventory->supplier_email }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Address:</span>
-                <span class="value">{{ $inventory->supplier_address }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Contact No:</span>
-                <span class="value">{{ $inventory->supplier_contactno }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Fax No:</span>
-                <span class="value">{{ $inventory->supplier_faxno }}</span>
-            </div>
+        <div class="item-details">
+            <table>
+                <tr>
+                    <th>Supplier Name</th>
+                    <td>{{ $inventory->supplier_name }}</td>
+                </tr>
+                <tr>
+                    <th>Email</th>
+                    <td>{{ $inventory->supplier_email }}</td>
+                </tr>
+                <tr>
+                    <th>Address</th>
+                    <td>{{ $inventory->supplier_address }}</td>
+                </tr>
+                <tr>
+                    <th>Contact No</th>
+                    <td>{{ $inventory->supplier_contactno }}</td>
+                </tr>
+                <tr>
+                    <th>Fax No</th>
+                    <td>{{ $inventory->supplier_faxno }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 
     <div class="section">
         <div class="section-title">Asset Information</div>
-        <div class="grid">
-            <div class="field">
-                <span class="label">Department:</span>
-                <span class="value">{{ $inventory->department->name }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Asset Location:</span>
-                <span class="value">{{ $inventory->asset_location }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Asset To:</span>
-                <span class="value">{{ $inventory->asset_to }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Asset Code:</span>
-                <span class="value">{{ $inventory->asset_code }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Category:</span>
-                <span class="value">{{ $inventory->asset_cat }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Asset Type:</span>
-                <span class="value">{{ $inventory->asset_type }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Item Location:</span>
-                <span class="value">{{ $inventory->item_location }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Item:</span>
-                <span class="value">{{ $inventory->item }}</span>
-            </div>
+        <div class="item-details">
+            <table>
+                <tr>
+                    <th>Department</th>
+                    <td>{{ $inventory->department->name }}</td>
+                </tr>
+                <tr>
+                    <th>Asset Location</th>
+                    <td>{{ $inventory->asset_location }}</td>
+                </tr>
+                <tr>
+                    <th>Asset To</th>
+                    <td>{{ $inventory->asset_to }}</td>
+                </tr>
+                <tr>
+                    <th>Asset Code</th>
+                    <td>{{ $inventory->asset_code }}</td>
+                </tr>
+                <tr>
+                    <th>Asset Category</th>
+                    <td>{{ $inventory->asset_cat }}</td>
+                </tr>
+                <tr>
+                    <th>Asset Type</th>
+                    <td>{{ $inventory->asset_type }}</td>
+                </tr>
+                <tr>
+                    <th>Item Location</th>
+                    <td>{{ $inventory->item_location }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 
     <div class="section">
-        <div class="section-title">Additional Information</div>
-        <div class="grid">
-            <div class="field">
-                <span class="label">Serial Number:</span>
-                <span class="value">{{ $inventory->serial_num }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Microsoft Office:</span>
-                <span class="value">{{ $inventory->microsoft_office }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Tel Number:</span>
-                <span class="value">{{ $inventory->tel_number }}</span>
-            </div>
-            <div class="field">
-                <span class="label">NOS:</span>
-                <span class="value">{{ $inventory->nos }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Amount (RM):</span>
-                <span class="value">{{ number_format($inventory->amount, 2) }}</span>
-            </div>
-            <div class="field">
-                <span class="label">Description:</span>
-                <span class="value">{{ $inventory->description }}</span>
-            </div>
+        <div class="section-title">Item Details</div>
+        <div class="item-details">
+            <table>
+                <tr>
+                    <th>Item</th>
+                    <td>{{ $inventory->item }}</td>
+                </tr>
+                <tr>
+                    <th>Description</th>
+                    <td>{{ $inventory->description }}</td>
+                </tr>
+                <tr>
+                    <th>Serial Number</th>
+                    <td>{{ $inventory->serial_num }}</td>
+                </tr>
+                <tr>
+                    <th>Microsoft Office</th>
+                    <td>{{ $inventory->microsoft_office }}</td>
+                </tr>
+                <tr>
+                    <th>Tel Number</th>
+                    <td>{{ $inventory->tel_number }}</td>
+                </tr>
+                <tr>
+                    <th>NOS</th>
+                    <td>{{ $inventory->nos }}</td>
+                </tr>
+                <tr>
+                    <th>Amount (RM)</th>
+                    <td>{{ number_format($inventory->amount, 2) }}</td>
+                </tr>
+            </table>
         </div>
     </div>
 
