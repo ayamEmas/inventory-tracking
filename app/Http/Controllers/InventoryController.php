@@ -12,6 +12,7 @@ use Endroid\QrCode\Encoding\Encoding;
 use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Label\Label;
+use Barryvdh\DomPDF\Facade\Pdf;
 
 class InventoryController extends Controller
 {
@@ -181,5 +182,100 @@ class InventoryController extends Controller
         return response($result->getString())
             ->header('Content-Type', 'image/png')
             ->header('Content-Disposition', 'attachment; filename="' . $filename . '"');
+    }
+
+    public function downloadPdf(Request $request)
+    {
+        $type = $request->type;
+        $value = $request->value;
+
+        $query = Inventory::with('department');
+
+        switch ($type) {
+            case 'department':
+                $query->whereHas('department', function($q) use ($value) {
+                    $q->where('name', $value);
+                });
+                $title = "Inventory - {$value} Department";
+                break;
+            case 'year':
+                $query->whereYear('date', $value);
+                $title = "Inventory - Year {$value}";
+                break;
+            default:
+                $title = "Complete Inventory List";
+                break;
+        }
+
+        $inventories = $query->get();
+
+        // Generate QR codes for all items
+        $inventoriesWithQr = $inventories->map(function ($inventory) {
+            $url = route('inventories.edit', $inventory->id);
+            $qrCode = QrCode::create($url)
+                ->setEncoding(new Encoding('UTF-8'))
+                ->setErrorCorrectionLevel(ErrorCorrectionLevel::High)
+                ->setSize(100)
+                ->setMargin(5)
+                ->setRoundBlockSizeMode(RoundBlockSizeMode::Margin)
+                ->setForegroundColor(new Color(0, 0, 0))
+                ->setBackgroundColor(new Color(255, 255, 255));
+
+            $writer = new PngWriter();
+            $result = $writer->write($qrCode);
+            $inventory->qrCode = base64_encode($result->getString());
+            return $inventory;
+        });
+
+        // Group by department
+        $groupedInventories = $inventoriesWithQr->groupBy('department.name');
+        
+        // Separate "None" department items
+        $noDepartmentItems = $groupedInventories->pull('None');
+        
+        // Sort remaining departments alphabetically
+        $groupedInventories = $groupedInventories->sortKeys();
+        
+        // Add "None" back at the end if it exists
+        if ($noDepartmentItems) {
+            $groupedInventories->put('None', $noDepartmentItems);
+        }
+
+        $pdf = PDF::loadView('pdf.inventory', [
+            'title' => $title,
+            'groupedInventories' => $groupedInventories,
+            'date' => now()->format('F d, Y')
+        ]);
+
+        // Replace slashes with hyphens in the filename
+        $filename = str_replace(['/', '\\'], '-', strtolower(str_replace(' ', '-', $title)));
+        return $pdf->download('inventory-' . $filename . '.pdf');
+    }
+
+    public function downloadSinglePdf($id)
+    {
+        $inventory = Inventory::with('department')->findOrFail($id);
+        $url = route('inventories.edit', $inventory->id);
+
+        $qrCode = QrCode::create($url)
+            ->setEncoding(new Encoding('UTF-8'))
+            ->setErrorCorrectionLevel(ErrorCorrectionLevel::High)
+            ->setSize(300)
+            ->setMargin(10)
+            ->setRoundBlockSizeMode(RoundBlockSizeMode::Margin)
+            ->setForegroundColor(new Color(0, 0, 0))
+            ->setBackgroundColor(new Color(255, 255, 255));
+
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+        $qrCodeString = $result->getString();
+
+        $pdf = PDF::loadView('pdf.single-inventory', [
+            'inventory' => $inventory,
+            'date' => now()->format('F d, Y'),
+            'qrCode' => $qrCodeString
+        ]);
+
+        return $pdf->download('inventory-' . $inventory->id_tag . '.pdf');
     }
 }

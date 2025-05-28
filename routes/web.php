@@ -26,6 +26,8 @@ Route::put('/inventory/{id}', [InventoryController::class, 'update'])->middlewar
 Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->middleware(['auth', 'verified'])->name('inventories.destroy');
 
 Route::get('/inventories/{id}/download-qr', [InventoryController::class, 'downloadQr'])->name('inventories.download-qr');
+Route::get('/inventories/download-pdf', [InventoryController::class, 'downloadPdf'])->name('inventories.download-pdf');
+Route::get('/inventories/{id}/download-pdf', [InventoryController::class, 'downloadSinglePdf'])->name('inventories.download-single-pdf');
 
 # User list page
 Route::get('/user', [UserController::class, 'index'])->middleware(['auth', 'verified'])->name('user');
