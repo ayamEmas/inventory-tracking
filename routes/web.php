@@ -29,6 +29,8 @@ Route::get('/inventories/{id}/download-qr', [InventoryController::class, 'downlo
 Route::get('/inventories/download-pdf', [InventoryController::class, 'downloadPdf'])->name('inventories.download-pdf');
 Route::get('/inventories/{id}/download-pdf', [InventoryController::class, 'downloadSinglePdf'])->name('inventories.download-single-pdf');
 
+Route::get('/inventories/deleted', [InventoryController::class, 'deletedItems'])->name('inventories.deleted');
+
 # User list page
 Route::get('/user', [UserController::class, 'index'])->middleware(['auth', 'verified'])->name('user');
 

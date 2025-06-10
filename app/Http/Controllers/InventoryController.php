@@ -13,6 +13,7 @@ use Endroid\QrCode\ErrorCorrectionLevel;
 use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Label\Label;
 use Barryvdh\DomPDF\Facade\Pdf;
+use App\Models\DeletedInventory;
 
 class InventoryController extends Controller
 {
@@ -155,15 +156,44 @@ class InventoryController extends Controller
 
     public function destroy ($id) {
         $inventory = Inventory::findOrFail($id);
+        
+        // Create a new record in deleted_inventories
+        DeletedInventory::create([
+            'date' => $inventory->date,
+            'purchase_order_no' => $inventory->purchase_order_no,
+            'supplier_name' => $inventory->supplier_name,
+            'supplier_email' => $inventory->supplier_email,
+            'supplier_address' => $inventory->supplier_address,
+            'supplier_contactno' => $inventory->supplier_contactno,
+            'supplier_faxno' => $inventory->supplier_faxno,
+            'department_id' => $inventory->department_id,
+            'asset_location' => $inventory->asset_location,
+            'asset_to' => $inventory->asset_to,
+            'asset_code' => $inventory->asset_code,
+            'asset_cat' => $inventory->asset_cat,
+            'asset_type' => $inventory->asset_type,
+            'item_location' => $inventory->item_location,
+            'serial_num' => $inventory->serial_num,
+            'microsoft_office' => $inventory->microsoft_office,
+            'tel_number' => $inventory->tel_number,
+            'nos' => $inventory->nos,
+            'description' => $inventory->description,
+            'amount' => $inventory->amount,
+            'item' => $inventory->item,
+            'id_tag' => $inventory->id_tag,
+            'deleted_at' => now(),
+        ]);
+
+        // Delete from the original table
         $inventory->delete();
 
-        return redirect()->route('inventory')->with('success', 'Inventory deleted successfully!');
+        return redirect()->route('inventory')->with('success', 'Inventory moved to deleted items successfully!');
     }
 
     public function downloadQr($id)
     {
         $inventory = Inventory::findOrFail($id);
-        $url = route('inventories.download-single-pdf', $inventory->id);
+        $url = url(route('inventories.download-single-pdf', $inventory->id, false));
 
         $qrCode = QrCode::create($url)
             ->setEncoding(new Encoding('UTF-8'))
@@ -212,8 +242,18 @@ class InventoryController extends Controller
 
         // Generate QR codes for all items
         $inventoriesWithQr = $inventories->map(function ($inventory) {
-            $url = route('inventories.edit', $inventory->id);
-            $qrCode = QrCode::create($url)
+            // Generate PDF data
+            $pdf = PDF::loadView('pdf.single-inventory', [
+                'inventory' => $inventory,
+                'date' => now()->format('F d, Y'),
+                'qrCode' => '' // We don't need QR code in the PDF since this is the QR code itself
+            ]);
+            
+            // Get PDF content as base64
+            $pdfContent = base64_encode($pdf->output());
+            
+            // Create QR code with PDF data
+            $qrCode = QrCode::create($pdfContent)
                 ->setEncoding(new Encoding('UTF-8'))
                 ->setErrorCorrectionLevel(ErrorCorrectionLevel::High)
                 ->setSize(100)
@@ -280,5 +320,33 @@ class InventoryController extends Controller
         // Replace slashes with hyphens in the filename
         $filename = str_replace(['/', '\\'], '-', $inventory->id_tag);
         return $pdf->download('inventory-' . $filename . '.pdf');
+    }
+
+    public function deletedItems(Request $request)
+    {
+        $query = DeletedInventory::with('department');
+
+        if ($request->filled('item_filter')) {
+            $query->where('item', 'like', '%' . $request->item_filter . '%');
+        }
+
+        if ($request->filled('id_tag_filter')) {
+            $query->where('id_tag', 'like', '%' . $request->id_tag_filter . '%');
+        }
+
+        if ($request->filled('department_filter')) {
+            $query->whereHas('department', function($q) use ($request) {
+                $q->where('name', 'like', '%' . $request->department_filter . '%');
+            });
+        }
+
+        if ($request->filled('year_filter')) {
+            $query->whereYear('deleted_at', $request->year_filter);
+        }
+
+        $deletedItems = $query->orderBy('deleted_at', 'desc')->get();
+        $departments = Department::all();
+
+        return view('deleted-inventory', compact('deletedItems', 'departments'));
     }
 }
