@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\User;
 use App\Models\Inventory;
 use App\Models\Department;
+use App\Models\DeletedInventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -14,6 +15,7 @@ class DashboardController extends Controller
     {
         $users = User::with('department')->get();
         $inventories = Inventory::with('department')->get();
+        $deletedItems = DeletedInventory::with('department')->get();
         
         // Calculate department distribution
         $departmentDistribution = Department::withCount('inventories')
@@ -28,6 +30,6 @@ class DashboardController extends Controller
                 ];
             });
 
-        return view('dashboard', compact('users', 'inventories', 'departmentDistribution'));
+        return view('dashboard', compact('users', 'inventories', 'departmentDistribution', 'deletedItems'));
     }
 } 
