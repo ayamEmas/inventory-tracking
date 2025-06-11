@@ -45,15 +45,4 @@ class DeletedInventory extends Model
     {
         return $this->belongsTo(Department::class);
     }
-
-    protected static function boot()
-    {
-        parent::boot();
-
-        static::creating(function ($model) {
-            if (empty($model->id_tag)) {
-                $model->id_tag = 'DELETED-' . uniqid();
-            }
-        });
-    }
 }

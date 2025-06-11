@@ -322,6 +322,36 @@ class InventoryController extends Controller
         return $pdf->download('inventory-' . $filename . '.pdf');
     }
 
+    public function downloadDeletedPdf($id)
+    {
+        $inventory = DeletedInventory::with('department')->findOrFail($id);
+        $url = route('inventories.download-deleted-pdf', $inventory->id);
+
+        $qrCode = QrCode::create($url)
+            ->setEncoding(new Encoding('UTF-8'))
+            ->setErrorCorrectionLevel(ErrorCorrectionLevel::High)
+            ->setSize(300)
+            ->setMargin(10)
+            ->setRoundBlockSizeMode(RoundBlockSizeMode::Margin)
+            ->setForegroundColor(new Color(0, 0, 0))
+            ->setBackgroundColor(new Color(255, 255, 255));
+
+        $writer = new PngWriter();
+        $result = $writer->write($qrCode);
+        $qrCodeString = $result->getString();
+
+        $pdf = PDF::loadView('pdf.single-inventory', [
+            'inventory' => $inventory,
+            'date' => now()->format('F d, Y'),
+            'qrCode' => $qrCodeString,
+            'isDeleted' => true
+        ]);
+
+        // Replace slashes with hyphens in the filename
+        $filename = str_replace(['/', '\\'], '-', $inventory->id_tag);
+        return $pdf->download('deleted-inventory-' . $filename . '.pdf');
+    }
+
     public function deletedItems(Request $request)
     {
         $query = DeletedInventory::with('department');
@@ -341,12 +371,48 @@ class InventoryController extends Controller
         }
 
         if ($request->filled('year_filter')) {
-            $query->whereYear('deleted_at', $request->year_filter);
+            $query->whereYear('date', $request->year_filter);
         }
 
         $deletedItems = $query->orderBy('deleted_at', 'desc')->get();
         $departments = Department::all();
 
         return view('deleted-inventory', compact('deletedItems', 'departments'));
+    }
+
+    public function restore($id)
+    {
+        $deletedItem = DeletedInventory::findOrFail($id);
+        
+        // Create a new record in inventories
+        Inventory::create([
+            'date' => $deletedItem->date,
+            'purchase_order_no' => $deletedItem->purchase_order_no,
+            'supplier_name' => $deletedItem->supplier_name,
+            'supplier_email' => $deletedItem->supplier_email,
+            'supplier_address' => $deletedItem->supplier_address,
+            'supplier_contactno' => $deletedItem->supplier_contactno,
+            'supplier_faxno' => $deletedItem->supplier_faxno,
+            'department_id' => $deletedItem->department_id,
+            'asset_location' => $deletedItem->asset_location,
+            'asset_to' => $deletedItem->asset_to,
+            'asset_code' => $deletedItem->asset_code,
+            'asset_cat' => $deletedItem->asset_cat,
+            'asset_type' => $deletedItem->asset_type,
+            'item_location' => $deletedItem->item_location,
+            'serial_num' => $deletedItem->serial_num,
+            'microsoft_office' => $deletedItem->microsoft_office,
+            'tel_number' => $deletedItem->tel_number,
+            'nos' => $deletedItem->nos,
+            'description' => $deletedItem->description,
+            'amount' => $deletedItem->amount,
+            'item' => $deletedItem->item,
+            'id_tag' => $deletedItem->id_tag,
+        ]);
+
+        // Delete from deleted_inventories
+        $deletedItem->delete();
+
+        return redirect()->route('inventories.deleted')->with('success', 'Item has been restored successfully!');
     }
 }
