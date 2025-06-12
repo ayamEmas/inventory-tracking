@@ -85,7 +85,7 @@ class InventoryController extends Controller
         $year = date('y', strtotime($request->date));
 
         // Get first 3 letters of asset_cat
-        $assetCatCode = strtoupper(substr($request->asset_cat, 0, 3));
+        $assetCatCode = $request->asset_cat;
 
         // Get the last sequence number for this combination
         $lastInventory = Inventory::where('asset_location', $request->asset_location)
@@ -99,7 +99,7 @@ class InventoryController extends Controller
         $sequenceStr = str_pad($sequence, 3, '0', STR_PAD_LEFT);
 
         // Generate id_tag
-        $idTag = "QHSB/{$request->asset_location}/{$departmentCode}/{$year}/{$assetCatCode}/{$sequenceStr}";
+        $idTag = "QHSB/HQ/{$departmentCode}/{$assetCatCode}/{$year}/{$sequenceStr}";
 
         // Add id_tag to validated data
         $validated['id_tag'] = $idTag;

@@ -148,9 +148,24 @@
                         @endphp
 
                         @foreach($groupedInventories as $departmentName => $departmentItems)
-                            <div class="mb-8">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4 px-4">{{ $departmentName }}</h3>
-                                <div class="overflow-x-auto">
+                            <div x-data="{ open: true }" class="mb-8">
+                                <div class="flex items-center justify-between mb-4 px-4">
+                                    <h3 class="text-lg font-semibold text-gray-800">{{ $departmentName }}</h3>
+                                    <button @click="open = !open" 
+                                            class="text-gray-500 hover:text-gray-700 focus:outline-none transition-colors duration-300">
+                                        <svg x-show="!open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                        <svg x-show="open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                        </svg>
+                                    </button>
+                                </div>
+                                <div x-show="open" 
+                                     x-transition:enter="transition ease-out duration-300"
+                                     x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                     x-transition:enter-end="opacity-100 transform translate-y-0"
+                                     class="overflow-x-auto">
                                     <table class="w-full table-fixed divide-y divide-gray-200 border border-gray-300 rounded-lg overflow-hidden">
                                         <thead class="bg-gray-50">
                                             <tr>
