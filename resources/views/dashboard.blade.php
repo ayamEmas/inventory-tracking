@@ -24,8 +24,8 @@
                             <p class="text-sm font-medium text-gray-600">Total Inventories</p>
                             <p class="text-3xl font-bold text-gray-900 mt-1">{{ $inventories->count() }}</p>
                         </div>
-                        <div class="p-3 bg-indigo-100 rounded-xl group-hover:bg-indigo-200 transition-colors duration-300">
-                            <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="p-2.5 bg-indigo-100 rounded-xl group-hover:bg-indigo-200 transition-colors duration-300">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
                             </svg>
                         </div>
@@ -39,8 +39,8 @@
                             <p class="text-sm font-medium text-gray-600">Total Users</p>
                             <p class="text-3xl font-bold text-gray-900 mt-1">{{ $users->count() }}</p>
                         </div>
-                        <div class="p-3 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors duration-300">
-                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="p-2.5 bg-green-100 rounded-xl group-hover:bg-green-200 transition-colors duration-300">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
                             </svg>
                         </div>
@@ -54,8 +54,8 @@
                             <p class="text-sm font-medium text-gray-600">Total Departments</p>
                             <p class="text-3xl font-bold text-gray-900 mt-1">{{ $departmentDistribution->count() }}</p>
                         </div>
-                        <div class="p-3 bg-purple-100 rounded-xl group-hover:bg-purple-200 transition-colors duration-300">
-                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="p-2.5 bg-purple-100 rounded-xl group-hover:bg-purple-200 transition-colors duration-300">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                             </svg>
                         </div>
@@ -69,8 +69,8 @@
                             <p class="text-sm font-medium text-gray-600">Deleted Items</p>
                             <p class="text-3xl font-bold text-gray-900 mt-1">{{ $deletedItems->count() }}</p>
                         </div>
-                        <div class="p-3 bg-red-100 rounded-xl group-hover:bg-red-200 transition-colors duration-300">
-                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <div class="p-2.5 bg-red-100 rounded-xl group-hover:bg-red-200 transition-colors duration-300">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                             </svg>
                         </div>
