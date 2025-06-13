@@ -227,6 +227,7 @@
                                         </tbody>
                                     </table>
                                 </div>
+                                <div class="mt-6 border-b-2 border-gray-300"></div>
                             </div>
                         @endforeach
                     </div>
