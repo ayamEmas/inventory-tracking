@@ -17,16 +17,31 @@ class DashboardController extends Controller
         $inventories = Inventory::with('department')->get();
         $deletedItems = DeletedInventory::with('department')->get();
         
-        // Calculate department distribution
+        // Calculate department distribution with categories
         $departmentDistribution = Department::withCount('inventories')
             ->get()
             ->map(function ($department) use ($inventories) {
+                $departmentItems = $inventories->where('department_id', $department->id);
                 $total = $inventories->count();
                 $percentage = $total > 0 ? round(($department->inventories_count / $total) * 100) : 0;
+
+                // Calculate category distribution within department
+                $categories = $departmentItems->groupBy('asset_cat')
+                    ->map(function ($items) use ($departmentItems) {
+                        $deptTotal = $departmentItems->count();
+                        $percentage = $deptTotal > 0 ? round(($items->count() / $deptTotal) * 100) : 0;
+                        return [
+                            'name' => $items->first()->asset_cat,
+                            'count' => $items->count(),
+                            'percentage' => $percentage
+                        ];
+                    })->values();
+
                 return [
                     'name' => $department->name,
                     'count' => $department->inventories_count,
-                    'percentage' => $percentage
+                    'percentage' => $percentage,
+                    'categories' => $categories
                 ];
             });
 

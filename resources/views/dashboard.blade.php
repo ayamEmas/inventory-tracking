@@ -81,27 +81,59 @@
 
         <!-- Department Distribution -->
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white/90 backdrop-blur-sm p-6 shadow-lg rounded-xl animate-fade-in-up delay-600 border border-gray-100">
-                <div class="flex items-center gap-2 mb-4">
+            <div class="bg-white/90 backdrop-blur-sm p-4 shadow-lg rounded-xl animate-fade-in-up delay-600 border border-gray-100">
+                <div class="flex items-center gap-2 mb-3">
                     <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                     </svg>
                     <h3 class="text-lg font-semibold text-gray-800">Department Distribution</h3>
                 </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
                     @foreach($departmentDistribution as $department)
-                        <div class="bg-gray-50/50 rounded-lg p-4">
+                        <div class="bg-gray-50/50 rounded-lg p-3" x-data="{ open: false }">
                             <div class="flex items-center justify-between mb-2">
                                 <div class="flex items-center gap-2">
                                     <div class="w-2 h-2 rounded-full bg-indigo-500"></div>
                                     <span class="text-sm font-medium text-gray-700">{{ $department['name'] }}</span>
                                 </div>
-                                <span class="text-sm font-medium text-gray-900">{{ $department['percentage'] }}%</span>
+                                <div class="flex items-center gap-2">
+                                    <span class="text-sm font-medium text-gray-900">{{ $department['percentage'] }}%</span>
+                                    <span class="text-sm text-gray-500">({{ $department['count'] }})</span>
+                                    <button @click="open = !open" class="ml-2 text-indigo-600 hover:text-indigo-800 focus:outline-none transition-colors duration-200" :aria-expanded="open">
+                                        <svg x-show="!open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                        <svg x-show="open" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 15l7-7 7 7" />
+                                        </svg>
+                                    </button>
+                                </div>
                             </div>
-                            <div class="w-full bg-gray-200 rounded-full h-1.5">
+                            <div class="w-full bg-gray-200 rounded-full h-1.5 mb-2">
                                 <div class="bg-indigo-500 h-1.5 rounded-full" style="width: {{ $department['percentage'] }}%"></div>
                             </div>
-                            <p class="text-xs text-gray-500 mt-1">{{ $department['count'] }} items</p>
+                            
+                            <!-- Category Distribution within Department -->
+                            <div class="mt-2 pl-3 border-l-2 border-indigo-200" x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2">
+                                <h4 class="text-sm font-medium text-gray-600 mb-2">Categories:</h4>
+                                <div class="space-y-2">
+                                    @foreach($department['categories'] as $category)
+                                        <div>
+                                            <div class="flex items-center justify-between mb-0.5">
+                                                <div class="flex items-center gap-1.5">
+                                                    <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
+                                                    <span class="text-sm font-medium text-gray-700">{{ $category['name'] }}</span>
+                                                </div>
+                                                <span class="text-sm font-medium text-gray-900">{{ $category['percentage'] }}%</span>
+                                            </div>
+                                            <div class="w-full bg-gray-200 rounded-full h-1">
+                                                <div class="bg-green-500 h-1 rounded-full" style="width: {{ $category['percentage'] }}%"></div>
+                                            </div>
+                                            <p class="text-sm text-gray-500 mt-0.5">{{ $category['count'] }} items</p>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            </div>
                         </div>
                     @endforeach
                 </div>
