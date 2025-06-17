@@ -124,12 +124,14 @@
                                                     <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
                                                     <span class="text-sm font-medium text-gray-700">{{ $category['name'] }}</span>
                                                 </div>
-                                                <span class="text-sm font-medium text-gray-900">{{ $category['percentage'] }}%</span>
+                                                <div class="flex items-center gap-2">
+                                                    <span class="text-sm font-medium text-gray-900">RM {{ number_format($category['total_amount'], 2) }}</span>
+                                                    <span class="text-sm font-medium text-gray-900">{{ $category['percentage'] }}%</span>
+                                                </div>
                                             </div>
                                             <div class="w-full bg-gray-200 rounded-full h-1">
                                                 <div class="bg-green-500 h-1 rounded-full" style="width: {{ $category['percentage'] }}%"></div>
                                             </div>
-                                            <p class="text-sm text-gray-500 mt-0.5">{{ $category['count'] }} items</p>
                                         </div>
                                     @endforeach
                                 </div>

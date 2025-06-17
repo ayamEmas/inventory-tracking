@@ -30,10 +30,12 @@ class DashboardController extends Controller
                     ->map(function ($items) use ($departmentItems) {
                         $deptTotal = $departmentItems->count();
                         $percentage = $deptTotal > 0 ? round(($items->count() / $deptTotal) * 100) : 0;
+                        $totalAmount = $items->sum('amount');
                         return [
                             'name' => $items->first()->asset_cat,
                             'count' => $items->count(),
-                            'percentage' => $percentage
+                            'percentage' => $percentage,
+                            'total_amount' => $totalAmount
                         ];
                     })->values();
 
