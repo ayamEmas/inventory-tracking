@@ -127,6 +127,7 @@
                                                 <div class="flex items-center gap-2">
                                                     <span class="text-sm font-medium text-gray-900">RM {{ number_format($category['total_amount'], 2) }}</span>
                                                     <span class="text-sm font-medium text-gray-900">{{ $category['percentage'] }}%</span>
+                                                    <span class="text-sm text-gray-500">({{ $category['count'] }})</span>
                                                 </div>
                                             </div>
                                             <div class="w-full bg-gray-200 rounded-full h-1">

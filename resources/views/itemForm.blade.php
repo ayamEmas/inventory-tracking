@@ -182,7 +182,7 @@
 
                                 <!-- Item -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="item">Item</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="item">Item Name</label>
                                     <input name="item" id="item" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
                                 </div>
 
