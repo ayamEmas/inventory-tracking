@@ -117,12 +117,23 @@
                             <div class="mt-2 pl-3 border-l-2 border-indigo-200" x-show="open" x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 -translate-y-2" x-transition:enter-end="opacity-100 translate-y-0" x-transition:leave="transition ease-in duration-200" x-transition:leave-start="opacity-100 translate-y-0" x-transition:leave-end="opacity-0 -translate-y-2">
                                 <h4 class="text-sm font-medium text-gray-600 mb-2">Categories:</h4>
                                 <div class="space-y-2">
+                                    @php
+                                        $categoryNames = [
+                                            'B' => 'Building',
+                                            'MV' => 'Motor Vehicle',
+                                            'M' => 'Machinery',
+                                            'FF' => 'Furniture & Fitting',
+                                            'SE' => 'Site Equipment',
+                                            'OE' => 'Office Equipment',
+                                            'C' => 'Computer',
+                                        ];
+                                    @endphp
                                     @foreach($department['categories'] as $category)
                                         <div>
                                             <div class="flex items-center justify-between mb-0.5">
                                                 <div class="flex items-center gap-1.5">
                                                     <div class="w-1.5 h-1.5 rounded-full bg-green-500"></div>
-                                                    <span class="text-sm font-medium text-gray-700">{{ $category['name'] }}</span>
+                                                    <span class="text-sm font-medium text-gray-700">{{ $categoryNames[$category['name']] ?? $category['name'] }}</span>
                                                 </div>
                                                 <div class="flex items-center gap-2">
                                                     <span class="text-sm font-medium text-gray-900">RM {{ number_format($category['total_amount'], 2) }}</span>
