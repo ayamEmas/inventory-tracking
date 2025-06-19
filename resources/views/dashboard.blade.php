@@ -155,10 +155,10 @@
         </div>
 
         <!-- Staff + Inventory Table -->
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="flex flex-col md:flex-row md:space-x-6 space-y-6 md:space-y-0">
-                <!-- Inventory Column -->
-                <div class="block md:w-1/2 bg-white/90 backdrop-blur-sm p-8 shadow-lg sm:rounded-xl animate-fade-in-up delay-600 border border-gray-100">
+        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8" x-data="{ showInventory: true }">
+            <div class="relative">
+                <!-- Inventory Table -->
+                <div x-show="showInventory" class="bg-white/90 backdrop-blur-sm p-8 shadow-lg rounded-xl border border-gray-100 transition-all duration-300">
                     <div class="flex justify-between items-center mb-6">
                         <div class="flex items-center gap-2">
                             <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -173,34 +173,39 @@
                             </svg>
                         </a>
                     </div>
-                    <div class="overflow-y-auto custom-scrollbar" style="max-height: 300px;">
-                        <table class="min-w-full divide-y divide-gray-200 border border-gray-200 text-sm rounded-lg">
-                            <thead class="bg-gray-50/80 backdrop-blur-sm">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Item</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Department</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">#</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">Item</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">Department</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody>
                                 @forelse ($inventories as $index => $inventory)
-                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <tr class="even:bg-gray-50 hover:bg-indigo-50 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $inventory->item }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $inventory->department->name ?? 'No Department' }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No inventories found.</td>
+                                        <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500 italic">No inventories found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
+                    <!-- Next Button -->
+                    <button @click="showInventory = false" class="absolute top-1/2 right-0 -translate-y-1/2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-full p-2 shadow-lg focus:outline-none transition-all duration-200" title="Show User Table">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+                        </svg>
+                    </button>
                 </div>
-
-                <!-- Staff Table -->
-                <div class="block md:w-1/2 bg-white/90 backdrop-blur-sm p-8 shadow-lg sm:rounded-xl animate-fade-in-up delay-800 border border-gray-100">
+                <!-- User Table -->
+                <div x-show="!showInventory" class="bg-white/90 backdrop-blur-sm p-8 shadow-lg rounded-xl border border-gray-100 transition-all duration-300">
                     <div class="flex justify-between items-center mb-6">
                         <div class="flex items-center gap-2">
                             <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -215,30 +220,36 @@
                             </svg>
                         </a>
                     </div>
-                    <div class="overflow-y-auto custom-scrollbar" style="max-height: 300px;">
-                        <table class="min-w-full divide-y divide-gray-200 border border-gray-200 text-sm rounded-lg">
-                            <thead class="bg-gray-50/80 backdrop-blur-sm">
+                    <div class="overflow-x-auto custom-scrollbar">
+                        <table class="min-w-full bg-white border border-gray-200 rounded-lg overflow-hidden">
+                            <thead class="bg-gray-50">
                                 <tr>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">#</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Name</th>
-                                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Email</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">#</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">Name</th>
+                                    <th class="px-6 py-3 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider border-b">Email</th>
                                 </tr>
                             </thead>
-                            <tbody class="bg-white divide-y divide-gray-200">
+                            <tbody>
                                 @forelse ($users as $index => $user)
-                                    <tr class="hover:bg-gray-50 transition-colors duration-200">
+                                    <tr class="even:bg-gray-50 hover:bg-green-50 transition-colors">
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $index + 1 }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $user->name }}</td>
                                         <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-500">{{ $user->email }}</td>
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500">No staff found.</td>
+                                        <td colspan="3" class="px-6 py-4 text-center text-sm text-gray-500 italic">No staff found.</td>
                                     </tr>
                                 @endforelse
                             </tbody>
                         </table>
                     </div>
+                    <!-- Prev Button -->
+                    <button @click="showInventory = true" class="absolute top-1/2 left-0 -translate-y-1/2 bg-green-600 hover:bg-green-700 text-white rounded-full p-2 shadow-lg focus:outline-none transition-all duration-200" title="Show Inventory Table">
+                        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+                        </svg>
+                    </button>
                 </div>
             </div>
         </div>
