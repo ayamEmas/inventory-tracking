@@ -163,7 +163,7 @@
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
                 <div class="flex justify-between items-center h-16">
                     <div class="flex-shrink-0">
-                        <span class="text-white font-bold text-xl">Inventory System</span>
+                        <span class="text-white font-bold text-xl">Inventory & Asset System</span>
                     </div>
                     <div class="flex items-center">
                         <a href="{{ route('login') }}" class="group inline-flex items-center px-6 py-2 bg-white/90 hover:bg-white text-gray-900 rounded-lg shadow-lg transition-all duration-300 hover:scale-105 focus:outline focus:outline-2 focus:outline-red-500">
@@ -183,7 +183,7 @@
                 <div class="max-w-7xl mx-auto p-6 lg:p-8 relative z-10">
                     <div class="flex justify-center">
                         <div class="title-container">
-                            <h1 class="text-6xl font-bold text-white mb-8 title-shine fade-in">Inventory System</h1>
+                            <h1 class="text-6xl font-bold text-white mb-8 title-shine fade-in">Inventory & Asset System</h1>
                         </div>
                     </div>
 
@@ -191,7 +191,7 @@
                         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 lg:gap-8">
                             <div class="feature-card scale-100 p-6 bg-white/80 backdrop-blur-sm dark:bg-gray-800/50 dark:bg-gradient-to-bl from-gray-700/50 via-transparent dark:ring-1 dark:ring-inset dark:ring-white/5 rounded-lg shadow-2xl shadow-gray-500/20 dark:shadow-none flex fade-in delay-200">
                                 <div>
-                                    <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Track Your Inventory</h2>
+                                    <h2 class="mt-6 text-xl font-semibold text-gray-900 dark:text-white">Track Your Inventory & Asset</h2>
                                     <p class="mt-4 text-gray-500 dark:text-gray-400 text-sm leading-relaxed">
                                         Efficiently manage and track your inventory items. Keep records of all your assets in one place.
                                     </p>

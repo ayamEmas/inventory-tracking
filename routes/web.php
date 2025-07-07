@@ -5,6 +5,7 @@ use App\Http\Controllers\DepartController;
 use App\Http\Controllers\InventoryController;
 use App\Http\Controllers\UserController;
 use App\Http\Controllers\DashboardController;
+use App\Http\Controllers\DisposalController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -46,6 +47,11 @@ Route::delete('/user/{id}', [UserController::class, 'destroy'])->middleware(['au
 
 Route::post('/users/{user}/impersonate', [UserController::class, 'impersonate'])->name('users.impersonate');
 Route::post('/stop-impersonating', [UserController::class, 'stopImpersonating'])->name('stop.impersonating');
+
+# Disposal page
+Route::get('/pelupusan', [DisposalController::class, 'index'])->middleware(['auth', 'verified'])->name('pelupusan');
+Route::post('/pelupusan/search', [DisposalController::class, 'search'])->middleware(['auth', 'verified'])->name('pelupusan.search');
+Route::post('/pelupusan/store', [DisposalController::class, 'store'])->middleware(['auth', 'verified'])->name('pelupusan.store');
 
 # Profile
 Route::middleware('auth')->group(function () {

@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
 
-        <title>{{ config('app.name', 'Inventory') }}</title>
+        <title>{{ config('app.name', 'Inventory & Asset System') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.bunny.net">
@@ -112,7 +112,8 @@
         <div class="flex flex-col md:flex-row items-center w-full px-4 md:px-0">
             <div class="text-center md:text-left md:ml-32 text-white mb-8 md:mb-0">
                 <h1 class="text-4xl md:text-8xl font-bold mb-4 md:mb-6 animate-fade-in-left text-shadow">Welcome to</h1>
-                <h2 class="text-3xl md:text-7xl font-semibold animate-fade-in-left delay-200 text-shadow">Inventory Systems</h2>
+                <h2 class="text-3xl md:text-7xl font-semibold animate-fade-in-left delay-200 text-shadow">Inventory & Asset</h2>
+                <h2 class="text-3xl md:text-7xl font-semibold animate-fade-in-left delay-200 text-shadow">System</h2>
             </div>
             <div class="w-full max-w-md p-6 bg-white/90 backdrop-blur-sm rounded-xl shadow-xl md:ml-60 animate-fade-in-right delay-400">
                 <div class="flex justify-center mb-4">
