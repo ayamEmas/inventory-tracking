@@ -24,7 +24,6 @@ Route::post('/itemForm', [InventoryController::class, 'store'])->middleware(['au
 
 Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->middleware(['auth', 'verified'])->name('inventories.edit');
 Route::put('/inventory/{id}', [InventoryController::class, 'update'])->middleware(['auth', 'verified'])->name('inventories.update');
-Route::delete('/inventory/{id}', [InventoryController::class, 'destroy'])->middleware(['auth', 'verified'])->name('inventories.destroy');
 
 Route::get('/inventories/{id}/download-qr', [InventoryController::class, 'downloadQr'])->name('inventories.download-qr');
 Route::get('/inventories/download-pdf', [InventoryController::class, 'downloadPdf'])->name('inventories.download-pdf');
@@ -50,7 +49,7 @@ Route::post('/stop-impersonating', [UserController::class, 'stopImpersonating'])
 
 # Disposal page
 Route::get('/pelupusan', [DisposalController::class, 'index'])->middleware(['auth', 'verified'])->name('pelupusan');
-Route::post('/pelupusan/search', [DisposalController::class, 'search'])->middleware(['auth', 'verified'])->name('pelupusan.search');
+Route::match(['get', 'post'], '/pelupusan/search', [DisposalController::class, 'search'])->middleware(['auth', 'verified'])->name('pelupusan.search');
 Route::post('/pelupusan/store', [DisposalController::class, 'store'])->middleware(['auth', 'verified'])->name('pelupusan.store');
 
 # Profile

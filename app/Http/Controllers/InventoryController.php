@@ -14,6 +14,7 @@ use Endroid\QrCode\RoundBlockSizeMode;
 use Endroid\QrCode\Label\Label;
 use Barryvdh\DomPDF\Facade\Pdf;
 use App\Models\DeletedInventory;
+use Illuminate\Support\Facades\Storage;
 
 class InventoryController extends Controller
 {
@@ -68,6 +69,7 @@ class InventoryController extends Controller
             'description' => 'required|string|max:255', 
             'amount' => 'required|numeric',
             'item' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240',
         ]);
 
         // Get department code based on department name
@@ -103,6 +105,16 @@ class InventoryController extends Controller
 
         // Add id_tag to validated data
         $validated['id_tag'] = $idTag;
+
+        // Handle image upload with id_tag and date as filename
+        if ($request->hasFile('image')) {
+            $image = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $dateFormatted = date('Y-m-d', strtotime($request->date));
+            $imageName = $idTag . '_' . $dateFormatted . '.' . $extension;
+            $image->storeAs('public/images', $imageName);
+            $validated['image'] = $imageName;
+        }
 
         Inventory::create($validated);
 
@@ -146,48 +158,30 @@ class InventoryController extends Controller
             'description' => 'required|string|max:255', 
             'amount' => 'required|numeric',
             'item' => 'required|string|max:255',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
         ]);
 
         $inventory = Inventory::findOrFail($id);
+
+        // Handle image upload
+        if ($request->hasFile('image')) {
+            // Delete old image if exists
+            if ($inventory->image && Storage::disk('public')->exists('images/' . $inventory->image)) {
+                Storage::disk('public')->delete('images/' . $inventory->image);
+            }
+
+            // Upload new image
+            $image = $request->file('image');
+            $extension = $image->getClientOriginalExtension();
+            $dateFormatted = date('Y-m-d', strtotime($request->date));
+            $imageName = $inventory->id_tag . '_' . $dateFormatted . '.' . $extension;
+            $image->storeAs('public/images', $imageName);
+            $validated['image'] = $imageName;
+        }
+
         $inventory->update($validated);
 
         return redirect()->route('inventory')->with('success', 'Inventory updated successfully!');
-    }
-
-    public function destroy ($id) {
-        $inventory = Inventory::findOrFail($id);
-        
-        // Create a new record in deleted_inventories
-        DeletedInventory::create([
-            'date' => $inventory->date,
-            'purchase_order_no' => $inventory->purchase_order_no,
-            'supplier_name' => $inventory->supplier_name,
-            'supplier_email' => $inventory->supplier_email,
-            'supplier_address' => $inventory->supplier_address,
-            'supplier_contactno' => $inventory->supplier_contactno,
-            'supplier_faxno' => $inventory->supplier_faxno,
-            'department_id' => $inventory->department_id,
-            'asset_location' => $inventory->asset_location,
-            'asset_to' => $inventory->asset_to,
-            'asset_code' => $inventory->asset_code,
-            'asset_cat' => $inventory->asset_cat,
-            'asset_type' => $inventory->asset_type,
-            'item_location' => $inventory->item_location,
-            'serial_num' => $inventory->serial_num,
-            'microsoft_office' => $inventory->microsoft_office,
-            'tel_number' => $inventory->tel_number,
-            'nos' => $inventory->nos,
-            'description' => $inventory->description,
-            'amount' => $inventory->amount,
-            'item' => $inventory->item,
-            'id_tag' => $inventory->id_tag,
-            'deleted_at' => now(),
-        ]);
-
-        // Delete from the original table
-        $inventory->delete();
-
-        return redirect()->route('inventory')->with('success', 'Inventory moved to deleted items successfully!');
     }
 
     public function downloadQr($id)

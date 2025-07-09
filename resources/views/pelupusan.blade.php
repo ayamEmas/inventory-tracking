@@ -172,24 +172,6 @@
                                 </div>
                             </div>
 
-                            <!-- Disposal Action Buttons -->
-                            <div class="mt-8 pt-6 border-t border-gray-200">
-                                <div class="flex gap-4">
-                                    <x-primary-button class="bg-red-600 hover:bg-red-700">
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                                        </svg>
-                                        Mark for Disposal
-                                    </x-primary-button>
-                                    <x-secondary-button>
-                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                                        </svg>
-                                        Download PDF
-                                    </x-secondary-button>
-                                </div>
-                            </div>
-
                             <!-- Disposal Form -->
                             <div class="mt-8 pt-6 border-t border-gray-200">
                                 <h3 class="text-xl font-semibold text-gray-800 mb-6">Disposal Form</h3>
@@ -340,6 +322,78 @@
                                         </x-primary-button>
                                     </div>
                                 </form>
+                            </div>
+                        </div>
+                    @endif
+
+                    @if(isset($isDisposed) && $isDisposed && isset($deletedInventory))
+                        <div class="max-w-4xl mx-auto my-8">
+                            <div class="rounded-xl border-2 border-red-500 bg-white shadow-lg p-8 relative">
+                                <div class="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
+                                    <span class="inline-flex items-center px-3 py-1 rounded-full bg-red-500 text-white font-bold text-sm shadow">
+                                        <svg class="w-5 h-5 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 5.636l-1.414-1.414A9 9 0 105.636 18.364l1.414 1.414A9 9 0 1018.364 5.636z" />
+                                        </svg>
+                                        Disposed Item
+                                    </span>
+                                </div>
+                                <h2 class="text-2xl font-bold text-red-600 mb-2 text-center mt-4">This item has already been disposed</h2>
+                                <p class="text-center text-gray-700 mb-8">ID Tag: <span class="font-semibold">{{ $deletedInventory->id_tag }}</span></p>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+                                    <div>
+                                        <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Inventory Details</h3>
+                                        <ul class="text-gray-800 space-y-1">
+                                            <li><span class="font-medium text-gray-500">Item:</span> {{ $deletedInventory->item }}</li>
+                                            <li><span class="font-medium text-gray-500">Description:</span> {{ $deletedInventory->description }}</li>
+                                            <li><span class="font-medium text-gray-500">Quantity:</span> {{ $deletedInventory->nos }}</li>
+                                            <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format($deletedInventory->amount, 2) }}</li>
+                                            <li><span class="font-medium text-gray-500">Asset Code:</span> {{ $deletedInventory->asset_code }}</li>
+                                            <li><span class="font-medium text-gray-500">Asset Category:</span> {{ $deletedInventory->asset_cat }}</li>
+                                            <li><span class="font-medium text-gray-500">Asset Type:</span> {{ $deletedInventory->asset_type }}</li>
+                                            <li><span class="font-medium text-gray-500">Serial Number:</span> {{ $deletedInventory->serial_num }}</li>
+                                            <li><span class="font-medium text-gray-500">Asset Location:</span> {{ $deletedInventory->asset_location }}</li>
+                                            <li><span class="font-medium text-gray-500">Department:</span> {{ $deletedInventory->department->name ?? 'N/A' }}</li>
+                                            <li><span class="font-medium text-gray-500">Date:</span> {{ $deletedInventory->date }}</li>
+                                        </ul>
+                                    </div>
+                                    @if(isset($disposalData) && $disposalData)
+                                    <div>
+                                        <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Disposal Record</h3>
+                                        <ul class="text-gray-800 space-y-1">
+                                            <li><span class="font-medium text-gray-500">Registration Serial Number:</span> {{ $disposalData->registrationSerialNum }}</li>
+                                            <li><span class="font-medium text-gray-500">Asset Description:</span> {{ $disposalData->assetDescrip }}</li>
+                                            <li><span class="font-medium text-gray-500">Acquisition Date:</span> {{ $disposalData->acquisitionDate }}</li>
+                                            <li><span class="font-medium text-gray-500">Asset Age (Years):</span> {{ $disposalData->assetAge }}</li>
+                                            <li><span class="font-medium text-gray-500">Original Cost (RM):</span> {{ $disposalData->oriCost }}</li>
+                                            <li><span class="font-medium text-gray-500">Current Value (RM):</span> {{ $disposalData->currentValue }}</li>
+                                            <li><span class="font-medium text-gray-500">State of Asset:</span> {{ $disposalData->stateAsset }}</li>
+                                            <li><span class="font-medium text-gray-500">Disposal Method:</span> 
+                                                <span class="inline-block px-2 py-0.5 rounded bg-red-200 text-red-800 text-xs font-semibold">
+                                                    {{ $disposalData->disposalMethod }}
+                                                </span>
+                                            </li>
+                                            <li><span class="font-medium text-gray-500">Justification:</span> {{ $disposalData->justification }}</li>
+                                            <li><span class="font-medium text-gray-500">Notes:</span> {{ $disposalData->notes }}</li>
+                                            <li><span class="font-medium text-gray-500">Supervisor Name:</span> {{ $disposalData->supervisor1 }}</li>
+                                            <li><span class="font-medium text-gray-500">Name:</span> {{ $disposalData->name1 }}</li>
+                                            <li><span class="font-medium text-gray-500">Remarks:</span>
+                                                @if($disposalData->remarks1 == 1)
+                                                    <span class="inline-block px-2 py-0.5 rounded bg-green-200 text-green-800 text-xs font-semibold">Approved</span>
+                                                @elseif($disposalData->remarks1 == 0)
+                                                    <span class="inline-block px-2 py-0.5 rounded bg-red-200 text-red-800 text-xs font-semibold">Rejected</span>
+                                                @else
+                                                    -
+                                                @endif
+                                            </li>
+                                        </ul>
+                                    </div>
+                                    @endif
+                                </div>
+                                <div class="text-center mt-6">
+                                    <span class="inline-block px-4 py-2 rounded bg-red-50 text-red-700 font-semibold border border-red-200">
+                                        No further disposal actions can be performed on this item.
+                                    </span>
+                                </div>
                             </div>
                         </div>
                     @endif

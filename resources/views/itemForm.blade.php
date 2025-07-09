@@ -33,7 +33,7 @@
                         </a>
                     </div>
 
-                    <form method="POST" action="{{ route('itemForm.store') }}">
+                    <form method="POST" action="{{ route('itemForm.store') }}" enctype="multipart/form-data">
                         @csrf
 
                         <!-- GENERAL INFORMATION -->
@@ -244,6 +244,13 @@
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1" for="description">Description</label>
                                     <input type="text" name="description" id="description" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
+                                </div>
+
+                                <!-- Image Upload -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="image">Item Image</label>
+                                    <input type="file" name="image" id="image" accept="image/*" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300">
+                                    <p class="text-xs text-gray-500 mt-1">Upload an image of the item (JPG, PNG, GIF). Max size: 10MB</p>
                                 </div>
                             </div>
                         </div>

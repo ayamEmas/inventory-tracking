@@ -41,7 +41,7 @@
                         </div>
                     </div>
 
-                    <form method="POST" action="{{ route('inventories.update', $inventory->id) }}">
+                    <form method="POST" action="{{ route('inventories.update', $inventory->id) }}" enctype="multipart/form-data">
                         @csrf
                         @method('PUT')
 
@@ -245,6 +245,30 @@
                                     <label class="block text-sm font-medium text-gray-700 mb-1" for="description">Description</label>
                                     <input type="text" name="description" id="description" value="{{ $inventory->description }}" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
                                 </div>
+
+                                <!-- Current Image Display -->
+                                @if($inventory->image)
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">Current Image</label>
+                                    <div class="flex items-center gap-4">
+                                        <img src="{{ asset('storage/images/' . $inventory->image) }}" 
+                                             alt="{{ $inventory->item }}" 
+                                             class="w-32 h-32 object-cover rounded-lg border border-gray-200 hover:scale-105 transition-transform duration-200 cursor-pointer"
+                                             onclick="openImageModal('{{ asset('storage/images/' . $inventory->image) }}', '{{ $inventory->item }}')">
+                                        <div class="text-sm text-gray-600">
+                                            <p><strong>Current image:</strong> {{ $inventory->image }}</p>
+                                            <p class="text-xs text-gray-500 mt-1">Click image to view full size</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                @endif
+
+                                <!-- Image Upload -->
+                                <div class="md:col-span-2">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="image">Update Item Image</label>
+                                    <input type="file" name="image" id="image" accept="image/*" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300">
+                                    <p class="text-xs text-gray-500 mt-1">Upload a new image to replace the current one (JPG, PNG, GIF). Max size: 10MB. Leave empty to keep current image.</p>
+                                </div>
                             </div>
                         </div>
 
@@ -285,4 +309,38 @@
             </div>
         </div>
     </div>
+
+    <!-- Image Modal -->
+    <div id="imageModal" class="fixed inset-0 bg-black bg-opacity-50 z-50 hidden flex items-center justify-center">
+        <div class="bg-white rounded-lg p-4 max-w-2xl max-h-2xl">
+            <div class="flex justify-between items-center mb-4">
+                <h3 id="modalTitle" class="text-lg font-semibold text-gray-800"></h3>
+                <button onclick="closeImageModal()" class="text-gray-500 hover:text-gray-700">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <img id="modalImage" src="" alt="" class="w-full h-auto rounded-lg">
+        </div>
+    </div>
+
+    <script>
+        function openImageModal(imageSrc, title) {
+            document.getElementById('modalImage').src = imageSrc;
+            document.getElementById('modalTitle').textContent = title;
+            document.getElementById('imageModal').classList.remove('hidden');
+        }
+
+        function closeImageModal() {
+            document.getElementById('imageModal').classList.add('hidden');
+        }
+
+        // Close modal when clicking outside
+        document.getElementById('imageModal').addEventListener('click', function(e) {
+            if (e.target === this) {
+                closeImageModal();
+            }
+        });
+    </script>
 </x-app-layout>

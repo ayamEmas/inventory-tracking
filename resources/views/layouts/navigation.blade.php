@@ -46,10 +46,7 @@
                                     {{ __('Add Item') }}
                                 </x-dropdown-link>
                                 <x-dropdown-link :href="route('inventories.deleted')">
-                                    {{ __('Deleted Items') }}
-                                </x-dropdown-link>
-                                <x-dropdown-link :href="route('pelupusan')">
-                                    {{ __('Disposal') }}
+                                    {{ __('Inventory Disposal') }}
                                 </x-dropdown-link>
                             </x-slot>
                         </x-dropdown>
@@ -123,10 +120,7 @@
                     {{ __('Add Item') }}
                 </x-responsive-nav-link>
                 <x-responsive-nav-link :href="route('inventories.deleted')" :active="request()->routeIs('inventories.deleted')">
-                    {{ __('Deleted Items') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('pelupusan')" :active="request()->routeIs('pelupusan')">
-                    {{ __('Disposal') }}
+                    {{ __('Inventory Disposal') }}
                 </x-responsive-nav-link>
             </div>
             <x-responsive-nav-link :href="route('user')" :active="request()->routeIs('user')">

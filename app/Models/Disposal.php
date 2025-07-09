@@ -6,7 +6,6 @@ use Illuminate\Database\Eloquent\Model;
 
 class Disposal extends Model
 {
-    protected $table = 'disposals';
     
     protected $fillable = [
         'registrationSerialNum',

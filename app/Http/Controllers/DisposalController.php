@@ -7,6 +7,7 @@ use App\Models\Disposal;
 use App\Models\DeletedInventory;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 
 class DisposalController extends Controller
 {
@@ -17,12 +18,30 @@ class DisposalController extends Controller
 
     public function search(Request $request)
     {
+        // If GET and no id_tag, just show the page
+        if ($request->isMethod('get') && !$request->has('id_tag')) {
+            return view('pelupusan');
+        }
+
         $request->validate([
             'id_tag' => 'required|string|max:255'
         ]);
 
-        $inventory = Inventory::where('id_tag', $request->id_tag)->first();
+        // Check if the inventory is in deleted_inventories
+        $deletedInventory = \App\Models\DeletedInventory::where('id_tag', $request->id_tag)->first();
+        if ($deletedInventory) {
+            // Also get the disposal record (by serial number or id_tag)
+            $disposalData = \App\Models\Disposal::where('registrationSerialNum', $deletedInventory->serial_num)
+                ->orWhere('registrationSerialNum', $deletedInventory->id_tag)
+                ->latest()->first();
+            return view('pelupusan', [
+                'deletedInventory' => $deletedInventory,
+                'isDisposed' => true,
+                'disposalData' => $disposalData,
+            ]);
+        }
 
+        $inventory = \App\Models\Inventory::where('id_tag', $request->id_tag)->first();
         if (!$inventory) {
             return back()->withErrors(['id_tag' => 'Inventory with this ID tag not found.']);
         }
@@ -48,16 +67,36 @@ class DisposalController extends Controller
             'remarks1' => 'required|integer|min:0|max:1',
         ]);
 
+        $disposalData = $request->only([
+            'registrationSerialNum',
+            'assetDescrip',
+            'acquisitionDate',
+            'assetAge',
+            'oriCost',
+            'currentValue',
+            'stateAsset',
+            'disposalMethod',
+            'justification',
+            'notes',
+            'supervisor1',
+            'name1',
+            'remarks1',
+        ]);
+
+        Log::info('DisposalController@store: Start', ['data' => $disposalData]);
+
+        $inventory = Inventory::where('serial_num', $request->registrationSerialNum)->first();
+        if (!$inventory) {
+            Log::warning('DisposalController@store: Inventory not found', ['serial_num' => $request->registrationSerialNum]);
+            return back()->withErrors(['registrationSerialNum' => 'No inventory found with this serial number.']);
+        }
+
+        DB::beginTransaction();
         try {
-            DB::beginTransaction();
+            Log::info('DisposalController@store: Creating disposal record');
+            Disposal::create($disposalData);
 
-            // Find the inventory by serial_num matching registrationSerialNum
-            $inventory = Inventory::where('serial_num', $request->registrationSerialNum)->firstOrFail();
-
-            // Store disposal data
-            Disposal::create($request->all());
-
-            // Store in deleted_inventories table
+            Log::info('DisposalController@store: Creating deleted inventory record');
             DeletedInventory::create([
                 'date' => $inventory->date,
                 'purchase_order_no' => $inventory->purchase_order_no,
@@ -84,15 +123,15 @@ class DisposalController extends Controller
                 'deleted_at' => now()
             ]);
 
-            // Delete from main inventories table
+            Log::info('DisposalController@store: Deleting inventory record', ['id' => $inventory->id]);
             $inventory->delete();
 
             DB::commit();
-
+            Log::info('DisposalController@store: Success');
             return back()->with('success', 'Disposal form submitted successfully! Inventory has been moved to deleted items.');
-
         } catch (\Exception $e) {
-            DB::rollback();
+            DB::rollBack();
+            Log::error('DisposalController@store: Exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => 'An error occurred while processing the disposal. Please try again.']);
         }
     }

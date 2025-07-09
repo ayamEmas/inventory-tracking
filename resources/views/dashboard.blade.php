@@ -66,7 +66,7 @@
                 <div class="bg-white/90 backdrop-blur-sm p-6 shadow-lg rounded-xl border border-gray-100 animate-fade-in-up delay-500 hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 group">
                     <div class="flex items-center justify-between">
                         <div>
-                            <p class="text-sm font-medium text-gray-600">Deleted Items</p>
+                            <p class="text-sm font-medium text-gray-600">Inventory Disposal</p>
                             <p class="text-3xl font-bold text-gray-900 mt-1">{{ $deletedItems->count() }}</p>
                         </div>
                         <div class="p-2.5 bg-red-100 rounded-xl group-hover:bg-red-200 transition-colors duration-300">
