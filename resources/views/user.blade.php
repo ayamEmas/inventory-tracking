@@ -75,6 +75,7 @@
                                     <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">Name</th>
                                     <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">Email</th>
                                     <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">Department</th>
+                                    <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">Role</th>
                                     <th class="px-6 py-4 text-left text-sm font-semibold text-gray-600">Position</th>
                                     <th class="px-6 py-4 text-sm font-semibold text-gray-600 text-center">Action</th>
                                 </tr>
@@ -87,9 +88,10 @@
                                         <td class="px-6 py-4 text-left text-sm text-gray-600">{{ $user->email }}</td>
                                         <td class="px-6 py-4 text-left text-sm text-gray-600">{{ $user->department->name ?? 'No Department' }}</td>
                                         <td class="px-6 py-4 text-left text-sm text-gray-600">{{ $user->role }}</td>
+                                        <td class="px-6 py-4 text-left text-sm text-gray-600">{{ $user->position }}</td>
                                         <td class="px-6 py-4 text-sm text-gray-600 text-center">
                                             <div class="flex justify-center space-x-3">
-                                                @if(auth()->user()->department->name === 'Information Technology' && auth()->user()->role === 'Admin')
+                                                @if(auth()->user()->position === 'Admin System')
                                                 <form action="{{ route('users.impersonate', $user->id) }}" method="POST" class="inline">
                                                     @csrf
                                                     <button type="submit" class="inline-block transform hover:-translate-y-1 transition-transform duration-300 group relative">
@@ -169,7 +171,8 @@
                                 <div class="space-y-2">
                                     <div><strong>Email:</strong> {{ $user->email }}</div>
                                     <div><strong>Department:</strong> {{ $user->department->name ?? 'No Department' }}</div>
-                                    <div><strong>Position:</strong> {{ $user->role }}</div>
+                                    <div><strong>Role:</strong> {{ $user->role }}</div>
+                                    <div><strong>Position:</strong> {{ $user->position }}</div>
                                 </div>
                             </div>
                         </div>

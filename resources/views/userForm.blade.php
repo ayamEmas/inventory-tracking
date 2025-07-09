@@ -111,7 +111,7 @@
 
                                 <!-- Role -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="role">Position</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="role">Role</label>
                                     <div class="relative">
                                         <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                                             <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -119,6 +119,18 @@
                                             </svg>
                                         </div>
                                         <input type="text" name="role" id="role" class="pl-10 w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
+                                    </div>
+                                </div>
+                                <!-- Position -->
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="position">Position</label>
+                                    <div class="relative">
+                                        <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                                            <svg class="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m8-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                                            </svg>
+                                        </div>
+                                        <input type="text" name="position" id="position" class="pl-10 w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
                                     </div>
                                 </div>
                             </div>

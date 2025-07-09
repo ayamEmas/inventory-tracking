@@ -30,6 +30,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
             'role' => 'required|string',
+            'position' => 'required|string',
             'department_id' => 'required|exists:departments,id',
             'password' => 'required|string|min:8',
         ]);
@@ -39,6 +40,7 @@ class UserController extends Controller
             'email' => $validated['email'],
             'password' => Hash::make($validated['password']),
             'role' => $validated['role'],
+            'position' => $validated['position'],
             'department_id' => $validated['department_id'],
         ]);
 
@@ -62,6 +64,7 @@ class UserController extends Controller
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
             'role' => 'required|string',
+            'position' => 'required|string',
             'department_id' => 'required|exists:departments,id',
             'password' => 'required|string|min:8',
         ]);

@@ -32,6 +32,18 @@
             </div>
             <x-input-error class="mt-2" :messages="$errors->get('name')" />
         </div>
+        <div>
+            <x-input-label for="position" :value="__('Position')" class="text-sm font-medium text-gray-700" />
+            <div class="mt-1 relative rounded-md shadow-sm">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-3-3v6m8-2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </div>
+                <x-text-input id="position" name="position" type="text" class="pl-10 block w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" :value="old('position', $user->position)" required autocomplete="position" />
+            </div>
+            <x-input-error class="mt-2" :messages="$errors->get('position')" />
+        </div>
 
         <div>
             <x-input-label for="email" :value="__('Email')" class="text-sm font-medium text-gray-700" />
