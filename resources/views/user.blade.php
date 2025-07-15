@@ -25,16 +25,24 @@
                          x-transition:enter-start="opacity-0 transform -translate-y-4"
                          x-transition:enter-end="opacity-100 transform translate-y-0"
                          class="flex items-center justify-between mb-6">
-                        <h3 class="text-xl font-semibold text-gray-800">User Record</h3>
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-800">User Record</h3>
+                            @if(auth()->user()->position === 'HOD')
+                            <p class="text-sm text-gray-600 mt-1">Showing users from {{ auth()->user()->department->name ?? 'your department' }}</p>
+                            @endif
+                        </div>
+                        @if(auth()->user()->position === 'Admin System')
                         <a href="{{ route('userForm') }}" class="bg-black text-white text-sm px-6 py-2.5 rounded-lg hover:bg-gray-800 text-center w-full sm:w-auto transition-all duration-500 hover:scale-105 flex items-center justify-center gap-2">
                             <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
                             </svg>
                             Add User
                         </a>
+                        @endif
                     </div>
 
                     <!-- Filter Section with Animation -->
+                    @if(auth()->user()->position !== 'HOD')
                     <div x-data="{ show: false }" 
                          x-init="setTimeout(() => show = true, 400)"
                          x-show="show"
@@ -59,6 +67,7 @@
                             </div>
                         </form>
                     </div>
+                    @endif
 
                     <!-- Table Layout with Animation -->
                     <div x-data="{ show: false }" 
@@ -104,6 +113,9 @@
                                                     </button>
                                                 </form>
                                                 @endif
+                                                
+                                                @if(auth()->user()->position === 'Admin System' || 
+                                                    (auth()->user()->position === 'HOD' && auth()->user()->department_id === $user->department_id))
                                                 <a href="{{ route('users.edit', $user->id) }}" class="inline-block transform hover:-translate-y-1 transition-transform duration-300 group relative">
                                                     <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
@@ -112,6 +124,9 @@
                                                         Edit
                                                     </span>
                                                 </a>
+                                                @endif
+                                                
+                                                @if(auth()->user()->position === 'Admin System')
                                                 <form action="{{ route('users.destroy', $user->id) }}" method="POST" class="inline">
                                                     @csrf
                                                     @method('DELETE')
@@ -124,6 +139,7 @@
                                                         </span>
                                                     </button>
                                                 </form>
+                                                @endif
                                             </div>
                                         </td>
                                     </tr>

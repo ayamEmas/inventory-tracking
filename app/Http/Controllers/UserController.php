@@ -12,7 +12,17 @@ class UserController extends Controller
 {
     public function index (Request $request) {
         $query = User::with('department');
-        $departments = Department::all();
+        
+        // Check if current user is HOD and restrict to their department
+        $currentUser = auth()->user();
+        
+        // Filter departments based on user role
+        if ($currentUser->position === 'HOD' && $currentUser->department_id) {
+            $departments = Department::where('id', $currentUser->department_id)->get();
+            $query->where('department_id', $currentUser->department_id);
+        } else {
+            $departments = Department::all();
+        }
 
         if ($request->filled('department_filter')) {
             $query->whereHas('department', function($q) use ($request) {
@@ -54,12 +64,29 @@ class UserController extends Controller
 
     public function edit ($id) {
         $user = User::findOrFail($id);
+        $currentUser = auth()->user();
+        
+        // Check if current user has permission to edit this user
+        if ($currentUser->position !== 'Admin System' && 
+            !($currentUser->position === 'HOD' && $currentUser->department_id === $user->department_id)) {
+            abort(403, 'Unauthorized action.');
+        }
+        
         $departments = Department::all();
 
         return view ('editUser', compact('user', 'departments'));
     }
 
     public function update (Request $request, $id) {
+        $user = User::findOrFail($id);
+        $currentUser = auth()->user();
+        
+        // Check if current user has permission to update this user
+        if ($currentUser->position !== 'Admin System' && 
+            !($currentUser->position === 'HOD' && $currentUser->department_id === $user->department_id)) {
+            abort(403, 'Unauthorized action.');
+        }
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email,' . $id,
@@ -69,7 +96,6 @@ class UserController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
-        $user = User::findOrFail($id);
         $user->update($validated);
 
         return redirect()->route('user')->with('success', 'User data updated successfully!');
@@ -77,6 +103,13 @@ class UserController extends Controller
 
     public function destroy ($id) {
         $user = User::findOrFail($id);
+        $currentUser = auth()->user();
+        
+        // Only Admin System can delete users
+        if ($currentUser->position !== 'Admin System') {
+            abort(403, 'Unauthorized action.');
+        }
+        
         $user->delete();
 
         return redirect()->route('user')->with('success', 'User deleted successfully!');
