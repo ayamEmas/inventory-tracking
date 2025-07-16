@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="mt-16 flex items-center justify-between">
             <h2 class="font-semibold text-2xl text-gray-800 leading-tight animate-fade-in">
                 {{ __('Disposal') }}
             </h2>
@@ -281,37 +281,6 @@
                                         </div>
                                     </div>
 
-                                    <!-- Supervisor Approval Section -->
-                                    <div class="bg-white border border-gray-200 rounded-lg p-6">
-                                        <h4 class="font-semibold text-gray-700 mb-4">Supervisor Approval</h4>
-                                        
-                                        <div class="p-4 border border-gray-200 rounded-lg">
-                                            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                                                <div>
-                                                    <x-input-label for="supervisor1" value="Supervisor Name" />
-                                                    <x-text-input id="supervisor1" name="supervisor1" type="text" 
-                                                        class="mt-1 block w-full" value="{{ old('supervisor1') }}" required />
-                                                    <x-input-error :messages="$errors->get('supervisor1')" class="mt-2" />
-                                                </div>
-                                                <div>
-                                                    <x-input-label for="name1" value="Name" />
-                                                    <x-text-input id="name1" name="name1" type="text" 
-                                                        class="mt-1 block w-full" value="{{ old('name1') }}" required />
-                                                    <x-input-error :messages="$errors->get('name1')" class="mt-2" />
-                                                </div>
-                                                <div>
-                                                    <x-input-label for="remarks1" value="Remarks" />
-                                                    <select id="remarks1" name="remarks1" class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500" required>
-                                                        <option value="">Select</option>
-                                                        <option value="1" {{ old('remarks1') == '1' ? 'selected' : '' }}>Approved</option>
-                                                        <option value="0" {{ old('remarks1') == '0' ? 'selected' : '' }}>Rejected</option>
-                                                    </select>
-                                                    <x-input-error :messages="$errors->get('remarks1')" class="mt-2" />
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-
                                     <!-- Submit Button -->
                                     <div class="flex justify-end">
                                         <x-primary-button type="submit" class="bg-green-600 hover:bg-green-700">
@@ -374,17 +343,6 @@
                                             </li>
                                             <li><span class="font-medium text-gray-500">Justification:</span> {{ $disposalData->justification }}</li>
                                             <li><span class="font-medium text-gray-500">Notes:</span> {{ $disposalData->notes }}</li>
-                                            <li><span class="font-medium text-gray-500">Supervisor Name:</span> {{ $disposalData->supervisor1 }}</li>
-                                            <li><span class="font-medium text-gray-500">Name:</span> {{ $disposalData->name1 }}</li>
-                                            <li><span class="font-medium text-gray-500">Remarks:</span>
-                                                @if($disposalData->remarks1 == 1)
-                                                    <span class="inline-block px-2 py-0.5 rounded bg-green-200 text-green-800 text-xs font-semibold">Approved</span>
-                                                @elseif($disposalData->remarks1 == 0)
-                                                    <span class="inline-block px-2 py-0.5 rounded bg-red-200 text-red-800 text-xs font-semibold">Rejected</span>
-                                                @else
-                                                    -
-                                                @endif
-                                            </li>
                                         </ul>
                                     </div>
                                     @endif

@@ -1,6 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
+        <div class="mt-16 flex items-center justify-between">
             <h2 class="font-semibold text-2xl text-gray-800 leading-tight animate-fade-in">
                 {{ __('Dashboard') }}
             </h2>

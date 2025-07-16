@@ -62,9 +62,6 @@ class DisposalController extends Controller
             'disposalMethod' => 'required|string|max:255',
             'justification' => 'required|string|max:255',
             'notes' => 'nullable|string|max:255',
-            'supervisor1' => 'required|string|max:255',
-            'name1' => 'required|string|max:255',
-            'remarks1' => 'required|integer|min:0|max:1',
         ]);
 
         $disposalData = $request->only([
@@ -78,9 +75,6 @@ class DisposalController extends Controller
             'disposalMethod',
             'justification',
             'notes',
-            'supervisor1',
-            'name1',
-            'remarks1',
         ]);
 
         Log::info('DisposalController@store: Start', ['data' => $disposalData]);
