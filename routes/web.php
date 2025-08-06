@@ -52,6 +52,13 @@ Route::get('/pelupusan', [DisposalController::class, 'index'])->middleware(['aut
 Route::match(['get', 'post'], '/pelupusan/search', [DisposalController::class, 'search'])->middleware(['auth', 'verified'])->name('pelupusan.search');
 Route::post('/pelupusan/store', [DisposalController::class, 'store'])->middleware(['auth', 'verified'])->name('pelupusan.store');
 
+# Disposal approval page
+Route::get('/disposal/approval/{id}', [DisposalController::class, 'showApproval'])->middleware(['auth', 'verified'])->name('disposal.approval');
+Route::post('/disposal/approve/{id}', [DisposalController::class, 'approve'])->middleware(['auth', 'verified'])->name('disposal.approve');
+
+# Info disposal page
+Route::get('/info-disposal', [DisposalController::class, 'infoDisposal'])->middleware(['auth', 'verified'])->name('info.disposal');
+
 # Profile
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

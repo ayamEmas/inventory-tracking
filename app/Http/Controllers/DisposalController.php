@@ -5,6 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Inventory;
 use App\Models\Disposal;
 use App\Models\DeletedInventory;
+use App\Models\User;
+use App\Models\Department;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -77,6 +79,17 @@ class DisposalController extends Controller
             'notes',
         ]);
 
+        // Get user with ID 1 for automatic assignment
+        $supervisorUser = User::find(1);
+        if (!$supervisorUser) {
+            return back()->withErrors(['error' => 'Supervisor user not found. Please contact administrator.']);
+        }
+
+        // Add automatic supervisor assignment
+        $disposalData['supervisor1'] = $supervisorUser->id;
+        $disposalData['name1'] = $supervisorUser->name;
+        $disposalData['remarks1'] = null;
+
         Log::info('DisposalController@store: Start', ['data' => $disposalData]);
 
         $inventory = Inventory::where('serial_num', $request->registrationSerialNum)->first();
@@ -128,5 +141,74 @@ class DisposalController extends Controller
             Log::error('DisposalController@store: Exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
             return back()->withErrors(['error' => 'An error occurred while processing the disposal. Please try again.']);
         }
+    }
+
+    public function showApproval($id)
+    {
+        $disposal = Disposal::findOrFail($id);
+        
+        if (!empty($disposal->supervisor1) && !empty($disposal->name1) && !empty($disposal->remarks1)) {
+            return redirect()->route('pelupusan')->with('error', 'This disposal has already been approved.');
+        }
+
+        $deletedInventory = DeletedInventory::where('serial_num', $disposal->registrationSerialNum)->firstOrFail();
+        $hods = User::where('role', 'HOD')->get();
+
+        return view('disposal-approval', compact('disposal', 'deletedInventory', 'hods'));
+    }
+
+    public function approve(Request $request, $id)
+    {
+        $request->validate([
+            'supervisor1' => 'required|exists:users,id',
+            'name1' => 'required|string|max:255',
+            'remarks1' => 'required|integer',
+        ]);
+
+        $disposal = Disposal::findOrFail($id);
+        $disposal->update([
+            'supervisor1' => $request->supervisor1,
+            'name1' => $request->name1,
+            'remarks1' => $request->remarks1,
+        ]);
+
+        return redirect()->route('pelupusan')->with('success', 'Disposal approved successfully!');
+    }
+
+    public function infoDisposal(Request $request)
+    {
+        // Get all disposals with filtering
+        $disposalsQuery = Disposal::query();
+        
+        if ($request->filled('id_tag_filter')) {
+            $disposalsQuery->where('registrationSerialNum', 'like', '%' . $request->id_tag_filter . '%');
+        }
+        
+        if ($request->filled('disposal_method_filter')) {
+            $disposalsQuery->where('disposalMethod', $request->disposal_method_filter);
+        }
+        
+        $disposals = $disposalsQuery->latest()->get();
+
+        // Get all deleted inventories with filtering
+        $deletedInventoriesQuery = DeletedInventory::with('department');
+        
+        if ($request->filled('id_tag_filter')) {
+            $deletedInventoriesQuery->where('id_tag', 'like', '%' . $request->id_tag_filter . '%');
+        }
+        
+        if ($request->filled('department_filter')) {
+            $deletedInventoriesQuery->where('department_id', $request->department_filter);
+        }
+        
+        $deletedInventories = $deletedInventoriesQuery->latest()->get();
+
+        // Get departments for filter
+        $departments = Department::all();
+
+        // Get unique disposal methods for filter
+        $disposalMethods = Disposal::distinct()->pluck('disposalMethod')->filter()->values();
+
+        return view('info-disposal', compact('disposals', 'deletedInventories', 'departments', 'disposalMethods'));
     }
 }

@@ -54,6 +54,14 @@
                 </svg>
                 <span class="block text-justify w-full">{{ __('Inventory') }}</span>
             </x-nav-link>
+            <x-nav-link :href="route('inventories.deleted')" :active="request()->routeIs('inventories.deleted')" font-size="text-lg"
+                class="block w-full rounded-lg py-2 transition hover:bg-indigo-100 hover:text-indigo-700 flex items-center gap-3 {{ request()->routeIs('pelupusan') ? 'bg-indigo-50 border-l-4 border-indigo-500 text-indigo-700' : '' }}">
+                <!-- Pelupusan Icon: Trash -->
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6M1 7h22"/>
+                </svg>
+                <span class="block text-justify w-full">{{ __('Disposal') }}</span>
+            </x-nav-link>
         @endif
     </nav>
 </aside>

@@ -19,8 +19,14 @@ class Disposal extends Model
         'justification',
         'notes',
         'supervisor1',
+        'supervisor2',
+        'supervisor3',
         'name1',
-        'remarks1'
+        'name2',
+        'name3',
+        'remarks1',
+        'remarks2',
+        'remarks3'
     ];
 
     protected $casts = [
@@ -28,6 +34,8 @@ class Disposal extends Model
         'assetAge' => 'integer',
         'oriCost' => 'double',
         'currentValue' => 'double',
-        'remarks1' => 'integer'
+        'remarks1' => 'integer',
+        'remarks2' => 'integer',
+        'remarks3' => 'integer'
     ];
 } 

@@ -171,7 +171,16 @@
                                 <!-- Asset Category -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1" for="asset_cat">Category</label>
-                                    <input name="asset_cat" id="asset_cat" value="{{ $inventory->asset_cat }}" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
+                                    <select name="asset_cat" id="asset_cat" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
+                                        <option value="">Select Category</option>
+                                        <option value="B">Building</option>
+                                        <option value="MV">Motor Vehicle</option>
+                                        <option value="M">Machinery</option>
+                                        <option value="FF">Furniture & Fitting</option>
+                                        <option value="SE">Site Equipment</option>
+                                        <option value="OE">Office Equipment</option>
+                                        <option value="C">Computer</option>
+                                    </select>
                                 </div>
 
                                 <!-- Asset Type -->

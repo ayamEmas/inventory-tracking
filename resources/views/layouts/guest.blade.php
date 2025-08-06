@@ -111,14 +111,14 @@
     <body class="min-h-screen flex flex-col md:flex-row items-center justify-center font-sans bg-cover bg-center bg-no-repeat bg-overlay" style="background-image: url('/image/bg.jpg');">
         <div class="flex flex-col md:flex-row items-center w-full px-4 md:px-0">
             <div class="text-center md:text-left md:ml-32 text-white mb-8 md:mb-0">
-                <h1 class="text-4xl md:text-8xl font-bold mb-4 md:mb-6 animate-fade-in-left text-shadow">Welcome to</h1>
-                <h2 class="text-3xl md:text-7xl font-semibold animate-fade-in-left delay-200 text-shadow">Inventory & Asset</h2>
-                <h2 class="text-3xl md:text-7xl font-semibold animate-fade-in-left delay-200 text-shadow">System</h2>
+                <h1 class="text-4xl md:text-8xl font-bold mb-4 md:mb-6 animate-fade-in-left text-shadow text-center">QAsset</h1>
+                <!--<h1 class="text-4xl md:text-8xl font-bold animate-fade-in-left delay-200 text-shadow text-center">QAsset</h1>-->
+                <h2 class="text-3xl md:text-5xl font-semibold animate-fade-in-left delay-200 text-shadow text-center">(Inventory & Asset System)</h2>
             </div>
             <div class="w-full max-w-md p-6 bg-white/90 backdrop-blur-sm rounded-xl shadow-xl md:ml-60 animate-fade-in-right delay-400">
                 <div class="flex justify-center mb-4">
                     <a href="/" class="hover-scale">
-                        <x-application-logo class="w-16 h-16 md:w-20 md:h-20 fill-current text-gray-500 animate-scale-in delay-600" />
+                        <x-application-logo class="w-16 h-16 md:w-20 md:h-20 fill-current text-gray-500 animate-scale-in delay-600"/>
                     </a>
                 </div>
                 <div class="animate-fade-in-up delay-600">

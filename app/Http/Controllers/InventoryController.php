@@ -163,6 +163,47 @@ class InventoryController extends Controller
 
         $inventory = Inventory::findOrFail($id);
 
+        // Check if ID tag needs to be regenerated
+        $needsIdTagUpdate = $inventory->department_id != $request->department_id ||
+                           $inventory->asset_location != $request->asset_location ||
+                           $inventory->asset_cat != $request->asset_cat ||
+                           $inventory->date != $request->date;
+
+        if ($needsIdTagUpdate) {
+            // Get department code based on department name
+            $department = Department::find($request->department_id);
+            $departmentCode = match(strtolower($department->name)) {
+                'information technology' => 'IT',
+                'contract' => 'CON',
+                'finance' => 'FIN',
+                'human resources' => 'HR',
+                'operation' => 'OPE',
+                default => 'NONE'
+            };
+
+            // Get year from date
+            $year = date('y', strtotime($request->date));
+
+            // Get first 3 letters of asset_cat
+            $assetCatCode = $request->asset_cat;
+
+            // Get the last sequence number for this combination
+            $lastInventory = Inventory::where('asset_location', $request->asset_location)
+                ->where('department_id', $request->department_id)
+                ->where('asset_cat', $request->asset_cat)
+                ->whereYear('date', date('Y', strtotime($request->date)))
+                ->where('id', '!=', $inventory->id) // Exclude current inventory
+                ->orderBy('id', 'desc')
+                ->first();
+
+            $sequence = $lastInventory ? intval(substr($lastInventory->id_tag, -3)) + 1 : 1;
+            $sequenceStr = str_pad($sequence, 3, '0', STR_PAD_LEFT);
+
+            // Generate new id_tag
+            $newIdTag = "QHSB/HQ/{$departmentCode}/{$assetCatCode}/{$year}/{$sequenceStr}";
+            $validated['id_tag'] = $newIdTag;
+        }
+
         // Handle image upload
         if ($request->hasFile('image')) {
             // Delete old image if exists
@@ -170,11 +211,11 @@ class InventoryController extends Controller
                 Storage::disk('public')->delete('images/' . $inventory->image);
             }
 
-            // Upload new image
+            // Upload new image with new id_tag if it was updated
             $image = $request->file('image');
             $extension = $image->getClientOriginalExtension();
             $dateFormatted = date('Y-m-d', strtotime($request->date));
-            $imageName = $inventory->id_tag . '_' . $dateFormatted . '.' . $extension;
+            $imageName = ($needsIdTagUpdate ? $validated['id_tag'] : $inventory->id_tag) . '_' . $dateFormatted . '.' . $extension;
             $image->storeAs('public/images', $imageName);
             $validated['image'] = $imageName;
         }
