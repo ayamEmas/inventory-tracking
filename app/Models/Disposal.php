@@ -38,4 +38,10 @@ class Disposal extends Model
         'remarks2' => 'integer',
         'remarks3' => 'integer'
     ];
+
+    public function deletedInventory()
+    {
+        return $this->hasOne(DeletedInventory::class, 'serial_num', 'registrationSerialNum')
+            ->orWhere('id_tag', $this->registrationSerialNum);
+    }
 } 

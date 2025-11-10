@@ -16,8 +16,13 @@ class UserController extends Controller
         // Check if current user is HOD and restrict to their department
         $currentUser = auth()->user();
         
+        // Check if user is from Finance (4) or Human Resources (3) - they have full access
+        $hasFullAccess = $currentUser->role === 'Admin System' || 
+                        $currentUser->department_id === 4 || // Finance
+                        $currentUser->department_id === 3;   // Human Resources
+        
         // Filter departments based on user role
-        if ($currentUser->position === 'HOD' && $currentUser->department_id) {
+        if (!$hasFullAccess && $currentUser->role === 'HOD' && $currentUser->department_id) {
             $departments = Department::where('id', $currentUser->department_id)->get();
             $query->where('department_id', $currentUser->department_id);
         } else {
@@ -32,10 +37,28 @@ class UserController extends Controller
 
         $users = $query->get();
 
+        // Define role hierarchy for sorting
+        $roleHierarchy = [
+            'Admin System' => 1,
+            'MD' => 2,
+            'GM' => 3,
+            'OM' => 4,
+            'HOD' => 5,
+            'AM' => 6,
+            'Staff' => 7
+        ];
+
+        // Sort users by role hierarchy
+        $users = $users->sortBy(function ($user) use ($roleHierarchy) {
+            return $roleHierarchy[$user->role] ?? 999; // Default to end if role not found
+        })->values(); // Reset array keys
+
         return view('user', compact('users', 'departments'));
     }
 
     public function store (Request $request) {
+        $currentUser = auth()->user();
+        
         $validated = $request->validate([
             'name' => 'required|string|max:255',
             'email' => 'required|email|unique:users,email',
@@ -44,6 +67,17 @@ class UserController extends Controller
             'department_id' => 'required|exists:departments,id',
             'password' => 'required|string|min:8',
         ]);
+
+        // Check if current user is HOD and restrict to their department
+        $hasFullAccess = $currentUser->role === 'Admin System' || 
+                        $currentUser->department_id === 4 || // Finance
+                        $currentUser->department_id === 3;   // Human Resources
+        
+        if (!$hasFullAccess && $currentUser->role === 'HOD' && $currentUser->department_id) {
+            if ($validated['department_id'] != $currentUser->department_id) {
+                abort(403, 'You can only create users in your own department.');
+            }
+        }
 
         User::create([
             'name' => $validated['name'],
@@ -58,7 +92,19 @@ class UserController extends Controller
     }
 
     public function create () {
-        $departments = Department::all();
+        $currentUser = auth()->user();
+        
+        // Filter departments based on user role
+        $hasFullAccess = $currentUser->role === 'Admin System' || 
+                        $currentUser->department_id === 4 || // Finance
+                        $currentUser->department_id === 3;   // Human Resources
+        
+        if (!$hasFullAccess && $currentUser->role === 'HOD' && $currentUser->department_id) {
+            $departments = Department::where('id', $currentUser->department_id)->get();
+        } else {
+            $departments = Department::all();
+        }
+        
         return view('userForm', compact('departments'));
     }
 
@@ -67,8 +113,12 @@ class UserController extends Controller
         $currentUser = auth()->user();
         
         // Check if current user has permission to edit this user
-        if ($currentUser->position !== 'Admin System' && 
-            !($currentUser->position === 'HOD' && $currentUser->department_id === $user->department_id)) {
+        $hasFullAccess = $currentUser->role === 'Admin System' || 
+                        $currentUser->department_id === 4 || // Finance
+                        $currentUser->department_id === 3;   // Human Resources
+        
+        if (!$hasFullAccess && 
+            !($currentUser->role === 'HOD' && $currentUser->department_id === $user->department_id)) {
             abort(403, 'Unauthorized action.');
         }
         
@@ -82,8 +132,12 @@ class UserController extends Controller
         $currentUser = auth()->user();
         
         // Check if current user has permission to update this user
-        if ($currentUser->position !== 'Admin System' && 
-            !($currentUser->position === 'HOD' && $currentUser->department_id === $user->department_id)) {
+        $hasFullAccess = $currentUser->role === 'Admin System' || 
+                        $currentUser->department_id === 4 || // Finance
+                        $currentUser->department_id === 3;   // Human Resources
+        
+        if (!$hasFullAccess && 
+            !($currentUser->role === 'HOD' && $currentUser->department_id === $user->department_id)) {
             abort(403, 'Unauthorized action.');
         }
         
@@ -96,6 +150,17 @@ class UserController extends Controller
             'password' => 'required|string|min:8',
         ]);
 
+        // Check if current user is HOD and restrict to their department
+        $hasFullAccess = $currentUser->role === 'Admin System' || 
+                        $currentUser->department_id === 4 || // Finance
+                        $currentUser->department_id === 3;   // Human Resources
+        
+        if (!$hasFullAccess && $currentUser->role === 'HOD' && $currentUser->department_id) {
+            if ($validated['department_id'] != $currentUser->department_id) {
+                abort(403, 'You can only update users in your own department.');
+            }
+        }
+
         $user->update($validated);
 
         return redirect()->route('user')->with('success', 'User data updated successfully!');
@@ -105,8 +170,12 @@ class UserController extends Controller
         $user = User::findOrFail($id);
         $currentUser = auth()->user();
         
-        // Only Admin System can delete users
-        if ($currentUser->position !== 'Admin System') {
+        // Only Admin System, Finance, and Human Resources can delete users
+        $hasFullAccess = $currentUser->role === 'Admin System' || 
+                        $currentUser->department_id === 4 || // Finance
+                        $currentUser->department_id === 3;   // Human Resources
+        
+        if (!$hasFullAccess) {
             abort(403, 'Unauthorized action.');
         }
         
@@ -117,8 +186,10 @@ class UserController extends Controller
 
     public function impersonate(User $user)
     {
-        // Check if the current user is an IT Admin
-        if (auth()->user()->department->name !== 'Information Technology' || auth()->user()->role !== 'Admin') {
+        $currentUser = auth()->user();
+        
+        // Only Admin System can impersonate users
+        if ($currentUser->role !== 'Admin System') {
             abort(403, 'Unauthorized action.');
         }
 

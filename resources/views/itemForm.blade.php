@@ -91,7 +91,7 @@
                                 <!-- Email -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1" for="supplier_email">Email</label>
-                                    <input type="email" name="supplier_email" id="supplier_email" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
+                                    <input type="text" name="supplier_email" id="supplier_email" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
                                 </div>
 
                                 <!-- Address -->
@@ -144,7 +144,13 @@
                                 <!-- Location -->
                                 <div>
                                     <label class="block text-sm font-medium text-gray-700 mb-1" for="asset_location">Asset Location</label>
-                                    <input name="asset_location" id="asset_location" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
+                                    <select name="asset_location" id="asset_location" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
+                                        <option value="">Select Location</option>
+                                        <option value="HQ">HQ</option>
+                                        <option value="KT">KT</option>
+                                        <option value="YP">YP</option>
+                                        <option value="QTTR">QTTR</option>
+                                    </select>
                                 </div>
 
                                 <!-- Asset To -->

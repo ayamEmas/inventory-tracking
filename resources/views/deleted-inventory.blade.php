@@ -39,12 +39,6 @@
                                 </svg>
                                 Disposal Form
                             </a>
-                            <a href="{{ route('inventory') }}" class="bg-gray-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-gray-700 text-center transition-all duration-500 hover:scale-105 flex items-center justify-center gap-2">
-                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                </svg>
-                                Back to Inventory
-                            </a>
                         </div>
                     </div>
 
@@ -124,44 +118,142 @@
                             // Group deleted items by department
                             $groupedItems = $deletedItems->groupBy('department.name');
                             
-                            // Separate "None" department items
-                            $noDepartmentItems = $groupedItems->pull('None');
+                            // Define department hierarchy for sorting
+                            $departmentHierarchy = [
+                                'Human Resources' => 1,
+                                'Finance' => 2,
+                                'Contract' => 3,
+                                'Operation' => 4,
+                                'Information Technology' => 5,
+                                'None' => 6
+                            ];
                             
-                            // Sort remaining departments alphabetically
-                            $groupedItems = $groupedItems->sortKeys();
+                            // Get current user's department
+                            $currentUserDepartment = auth()->user()->department->name ?? 'None';
                             
-                            // Add "None" back at the end if it exists
-                            if ($noDepartmentItems) {
-                                $groupedItems->put('None', $noDepartmentItems);
-                            }
+                            // Sort departments by hierarchy with user's department first
+                            $groupedItems = $groupedItems->sortBy(function ($items, $departmentName) use ($departmentHierarchy, $currentUserDepartment) {
+                                // If it's the user's own department, give it priority 0 (highest)
+                                if ($departmentName === $currentUserDepartment) {
+                                    return 0;
+                                }
+                                
+                                // Otherwise use the hierarchy order
+                                return $departmentHierarchy[$departmentName] ?? 999;
+                            });
                         @endphp
 
                         @foreach($groupedItems as $departmentName => $departmentItems)
                             <div class="mb-8">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4 px-4">{{ $departmentName }}</h3>
-                                <div class="overflow-x-auto">
-                                    <table class="w-full table-fixed divide-y divide-gray-200 border border-gray-300 rounded-lg overflow-hidden">
-                                        <thead class="bg-gray-50">
+                                <div class="overflow-x-auto border-2 border-gray-300 rounded-lg">
+                                    <table class="w-full table-auto divide-y divide-gray-300 border-2 border-gray-400 rounded-lg overflow-hidden shadow-lg">
+                                        <!-- Department Title Row -->
+                                        <thead class="bg-gray-100 border-b-2 border-gray-300">
                                             <tr>
-                                                <th class="w-[5%] px-6 py-4 text-left text-sm font-semibold text-gray-600">#</th>
-                                                <th class="w-[20%] px-6 py-4 text-left text-sm font-semibold text-gray-600">ID Tag</th>
-                                                <th class="w-[15%] px-6 py-4 text-left text-sm font-semibold text-gray-600">Date</th>
-                                                <th class="w-[30%] px-6 py-4 text-left text-sm font-semibold text-gray-600">Item</th>
-                                                <th class="w-[15%] px-6 py-4 text-left text-sm font-semibold text-gray-600">Deleted At</th>
-                                                <th class="w-[15%] px-6 py-4 text-sm font-semibold text-gray-600 text-center">Action</th>
+                                                <th colspan="5" class="px-6 py-4 text-center text-lg font-semibold text-gray-800">{{ $departmentName }}</th>
+                                            </tr>
+                                        </thead>
+                                        <!-- Column Headers -->
+                                        <thead class="bg-gray-100 border-b-2 border-gray-400">
+                                            <tr>
+                                                <th class="w-[3%] px-6 py-4 text-left text-sm font-semibold text-gray-600 border-r border-gray-300">#</th>
+                                                <th class="w-[25%] px-6 py-4 text-left text-sm font-semibold text-gray-600 border-r border-gray-300">ID Tag</th>
+                                                <th class="w-[35%] px-6 py-4 text-left text-sm font-semibold text-gray-600 border-r border-gray-300">Item</th>
+                                                <th class="w-[17%] px-6 py-4 text-left text-sm font-semibold text-gray-600 border-r border-gray-300">Status</th>
+                                                <th class="w-[20%] px-6 py-4 text-sm font-semibold text-gray-600 text-center">Action</th>
                                             </tr>
                                         </thead>
 
-                                        <tbody class="divide-y divide-gray-200 bg-white">
+                                        <tbody class="divide-y divide-gray-300 bg-white">   
                                             @forelse ($departmentItems as $index => $item)
-                                            <tr class="hover:bg-gray-50 transition-colors duration-300">
-                                                <td class="w-[5%] px-6 py-4 text-left text-sm text-gray-600">{{ $index + 1 }}</td>
-                                                <td class="w-[20%] px-6 py-4 text-left text-sm text-gray-600 truncate" title="{{ $item->id_tag }}">{{ $item->id_tag }}</td>
-                                                <td class="w-[15%] px-6 py-4 text-left text-sm text-gray-600">{{ $item->date->format('M d, Y') }}</td>
-                                                <td class="w-[30%] px-6 py-4 text-left text-sm text-gray-600 truncate" title="{{ $item->item }}">{{ $item->item }}</td>
-                                                <td class="w-[15%] px-6 py-4 text-left text-sm text-gray-600">{{ $item->deleted_at->format('M d, Y H:i') }}</td>
+                                            <tr class="hover:bg-white transition-colors duration-300">
+                                                <td class="w-[3%] px-6 py-4 text-left text-sm text-gray-600 border-r border-gray-300">{{ $index + 1 }}</td>
+                                                <td class="w-[25%] px-6 py-4 text-left text-sm text-gray-600 truncate border-r border-gray-300" title="{{ $item->id_tag }}">{{ $item->id_tag }}</td>
+                                                <td class="w-[35%] px-6 py-4 text-left text-sm text-gray-600 truncate border-r border-gray-300" title="{{ $item->item }}">{{ $item->item }}</td>
+                                                <td class="w-[17%] px-6 py-4 text-left text-sm text-gray-600 border-r border-gray-300">
+                                                    @if($item->disposal)
+                                                        @if($item->disposal->remarks1 == 1)
+                                                            @if($item->disposal->remarks2 == 1)
+                                                                @if($item->disposal->remarks3 == 1)
+                                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                                        </svg>
+                                                                        Approved
+                                                                    </span>
+                                                                @elseif($item->disposal->remarks3 == 2)
+                                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                                        </svg>
+                                                                        Rejected
+                                                                    </span>
+                                                                @else
+                                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                                                        </svg>
+                                                                        Pending for MD
+                                                                    </span>
+                                                                @endif
+                                                            @elseif($item->disposal->remarks2 == 2)
+                                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                                    </svg>
+                                                                    Rejected
+                                                                </span>
+                                                            @else
+                                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                                                    </svg>
+                                                                    Pending for GM
+                                                                </span>
+                                                            @endif
+                                                        @elseif($item->disposal->remarks1 == 2)
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                                </svg>
+                                                                Rejected
+                                                            </span>
+                                                        @else
+                                                            <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                                                </svg>
+                                                                Pending for Finance Manager
+                                                            </span>
+                                                        @endif
+                                                    @else
+                                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-white text-gray-800">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            No Disposal Record
+                                                        </span>
+                                                    @endif
+                                                </td>
                                                 <td class="w-[15%] px-6 py-4 text-sm text-gray-600 text-center">
                                                     <div class="flex justify-center space-x-3">
+                                                        @php
+                                                            // Find the disposal record for this deleted inventory item
+                                                            $disposal = \App\Models\Disposal::where('registrationSerialNum', $item->serial_num)
+                                                                ->orWhere('registrationSerialNum', $item->id_tag)
+                                                                ->first();
+                                                        @endphp
+                                                        @if($disposal)
+                                                        <a href="{{ route('disposal.approval', $disposal->id) }}" class="inline-block transform hover:-translate-y-1 transition-transform duration-300 group relative">
+                                                            <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                            </svg>
+                                                            <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+                                                                View Disposal
+                                                            </span>
+                                                        </a>
+                                                        @endif
                                                         <a href="{{ route('inventories.download-deleted-pdf', $item->id) }}" class="inline-block transform hover:-translate-y-1 transition-transform duration-300 group relative">
                                                             <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -170,6 +262,7 @@
                                                                 Download PDF
                                                             </span>
                                                         </a>
+                                                        @if(auth()->user()->role === 'Admin System')
                                                         <form action="{{ route('inventories.restore', $item->id) }}" method="POST" class="inline-block">
                                                             @csrf
                                                             <button type="submit" class="inline-block transform hover:-translate-y-1 transition-transform duration-300 group relative" onclick="return confirm('Are you sure you want to restore this item?')">
@@ -181,6 +274,7 @@
                                                                 </span>
                                                             </button>
                                                         </form>
+                                                        @endif
                                                     </div>
                                                 </td>
                                             </tr>
@@ -209,11 +303,16 @@
                         
                         @foreach($groupedItems as $departmentName => $departmentItems)
                             <div class="mb-6">
-                                <h3 class="text-lg font-semibold text-gray-800 mb-4 px-4">{{ $departmentName }}</h3>
+                                <!-- Department Title Card -->
+                                <div class="bg-gray-200 border-2 border-gray-400 rounded-lg mb-4">
+                                    <div class="px-6 py-4 text-center">
+                                        <h3 class="text-lg font-semibold text-gray-800">{{ $departmentName }}</h3>
+                                    </div>
+                                </div>
                                 
                                 @forelse ($departmentItems as $index => $item)
                                 <div x-data="{ open: false }" class="border border-gray-200 rounded-lg mb-4 shadow-sm hover:shadow-md transition-all duration-300">
-                                    <div class="flex justify-between items-center px-6 py-4 bg-gray-50">
+                                    <div class="flex justify-between items-center px-6 py-4 bg-white">
                                         <div class="text-sm font-medium text-gray-800">
                                             {{ $index + 1 }}. {{ $item->item }}
                                         </div>
@@ -236,16 +335,95 @@
                                         <div class="space-y-2">
                                             <div><strong>ID Tag:</strong> {{ $item->id_tag }}</div>
                                             <div><strong>Date:</strong> {{ $item->date->format('M d, Y') }}</div>
-                                            <div><strong>Deleted At:</strong> {{ $item->deleted_at->format('M d, Y H:i') }}</div>
+                                            <div><strong>Status:</strong> 
+                                                @if($item->disposal)
+                                                    @if($item->disposal->remarks1 == 1)
+                                                        @if($item->disposal->remarks2 == 1)
+                                                            @if($item->disposal->remarks3 == 1)
+                                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-green-100 text-green-800 ml-2">
+                                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                                                                    </svg>
+                                                                    Approved
+                                                                </span>
+                                                            @elseif($item->disposal->remarks3 == 2)
+                                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 ml-2">
+                                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                                    </svg>
+                                                                    Rejected
+                                                                </span>
+                                                            @else
+                                                                <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
+                                                                    <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                                                    </svg>
+                                                                    Pending for MD
+                                                                </span>
+                                                            @endif
+                                                        @elseif($item->disposal->remarks2 == 2)
+                                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 ml-2">
+                                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                                </svg>
+                                                                Rejected
+                                                            </span>
+                                                        @else
+                                                            <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
+                                                                <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                                                </svg>
+                                                                Pending for GM
+                                                            </span>
+                                                        @endif
+                                                    @elseif($item->disposal->remarks1 == 2)
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-red-100 text-red-800 ml-2">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            Rejected
+                                                        </span>
+                                                    @else
+                                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800 ml-2">
+                                                            <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm1-12a1 1 0 10-2 0v4a1 1 0 00.293.707l2.828 2.829a1 1 0 101.415-1.415L11 9.586V6z" clip-rule="evenodd" />
+                                                            </svg>
+                                                            Pending for Finance Manager
+                                                        </span>
+                                                    @endif
+                                                @else
+                                                    <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-white text-gray-800 ml-2">
+                                                        <svg class="w-3 h-3 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd" />
+                                                        </svg>
+                                                        No Disposal Record
+                                                    </span>
+                                                @endif
+                                            </div>
                                             <div><strong>Description:</strong> {{ $item->description }}</div>
                                             <div class="flex justify-center mt-4 space-x-4">
+                                                @php
+                                                    // Find the disposal record for this deleted inventory item
+                                                    $disposal = \App\Models\Disposal::where('registrationSerialNum', $item->serial_num)
+                                                        ->orWhere('registrationSerialNum', $item->id_tag)
+                                                        ->first();
+                                                @endphp
+                                                @if($disposal)
+                                                <a href="{{ route('disposal.approval', $disposal->id) }}" class="inline-flex items-center px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-300">
+                                                    <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                                                    </svg>
+                                                    View Disposal
+                                                </a>
+                                                @endif
                                                 <a href="{{ route('inventories.download-deleted-pdf', $item->id) }}" class="inline-flex items-center px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors duration-300">
                                                     <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                                                     </svg>
                                                     Download PDF
                                                 </a>
-                                                <form action="{{ route('inventories.restore', $item->id) }}" method="POST" class="inline-block">
+                                                <!--<form action="{{ route('inventories.restore', $item->id) }}" method="POST" class="inline-block">
                                                     @csrf
                                                     <button type="submit" class="inline-flex items-center px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-300" onclick="return confirm('Are you sure you want to restore this item?')">
                                                         <svg class="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -253,7 +431,7 @@
                                                         </svg>
                                                         Restore Item
                                                     </button>
-                                                </form>
+                                                </form>-->
                                             </div>
                                         </div>
                                     </div>

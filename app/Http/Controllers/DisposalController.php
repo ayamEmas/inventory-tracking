@@ -79,16 +79,21 @@ class DisposalController extends Controller
             'notes',
         ]);
 
-        // Get user with ID 1 for automatic assignment
-        $supervisorUser = User::find(1);
-        if (!$supervisorUser) {
-            return back()->withErrors(['error' => 'Supervisor user not found. Please contact administrator.']);
-        }
-
-        // Add automatic supervisor assignment
-        $disposalData['supervisor1'] = $supervisorUser->id;
-        $disposalData['name1'] = $supervisorUser->name;
-        $disposalData['remarks1'] = null;
+        // Set supervisor values manually
+        $disposalData['supervisor1'] = 5; // Set supervisor ID
+        $supervisor1 = User::find(5);
+        $disposalData['name1'] = $supervisor1 ? $supervisor1->name : 'Unknown'; // Get name from users table
+        $disposalData['remarks1'] = null; // 1 for approve, 2 for reject, null for pending
+        
+        $disposalData['supervisor2'] = 7; // Set supervisor ID
+        $supervisor2 = User::find(7);
+        $disposalData['name2'] = $supervisor2 ? $supervisor2->name : 'Unknown'; // Get name from users table
+        $disposalData['remarks2'] = null; // Pending
+        
+        $disposalData['supervisor3'] = 8; // Set supervisor ID
+        $supervisor3 = User::find(8);
+        $disposalData['name3'] = $supervisor3 ? $supervisor3->name : 'Unknown'; // Get name from users table
+        $disposalData['remarks3'] = null; // Pending
 
         Log::info('DisposalController@store: Start', ['data' => $disposalData]);
 
@@ -135,6 +140,11 @@ class DisposalController extends Controller
 
             DB::commit();
             Log::info('DisposalController@store: Success');
+            
+            // Add debugging
+            session()->flash('success', 'Disposal form submitted successfully! Inventory has been moved to deleted items.');
+            Log::info('DisposalController@store: Success message set', ['session_id' => session()->getId()]);
+            
             return back()->with('success', 'Disposal form submitted successfully! Inventory has been moved to deleted items.');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -147,32 +157,45 @@ class DisposalController extends Controller
     {
         $disposal = Disposal::findOrFail($id);
         
-        if (!empty($disposal->supervisor1) && !empty($disposal->name1) && !empty($disposal->remarks1)) {
-            return redirect()->route('pelupusan')->with('error', 'This disposal has already been approved.');
-        }
+        // Find the deleted inventory record
+        $deletedInventory = DeletedInventory::where('serial_num', $disposal->registrationSerialNum)
+            ->orWhere('id_tag', $disposal->registrationSerialNum)
+            ->firstOrFail();
 
-        $deletedInventory = DeletedInventory::where('serial_num', $disposal->registrationSerialNum)->firstOrFail();
-        $hods = User::where('role', 'HOD')->get();
-
-        return view('disposal-approval', compact('disposal', 'deletedInventory', 'hods'));
+        return view('disposal-approval', compact('disposal', 'deletedInventory'));
     }
 
     public function approve(Request $request, $id)
     {
-        $request->validate([
-            'supervisor1' => 'required|exists:users,id',
-            'name1' => 'required|string|max:255',
-            'remarks1' => 'required|integer',
-        ]);
 
         $disposal = Disposal::findOrFail($id);
         $disposal->update([
-            'supervisor1' => $request->supervisor1,
-            'name1' => $request->name1,
             'remarks1' => $request->remarks1,
         ]);
 
-        return redirect()->route('pelupusan')->with('success', 'Disposal approved successfully!');
+        return redirect()->route('info.disposal')->with('success', 'Disposal approved successfully!');
+    }
+
+    public function approve2(Request $request, $id)
+    {
+
+        $disposal = Disposal::findOrFail($id);
+        $disposal->update([
+            'remarks2' => $request->remarks2,
+        ]);
+
+        return redirect()->route('info.disposal')->with('success', 'Disposal approved by General Manager successfully!');
+    }
+
+    public function approve3(Request $request, $id)
+    {
+
+        $disposal = Disposal::findOrFail($id);
+        $disposal->update([
+            'remarks3' => $request->remarks3,
+        ]);
+
+        return redirect()->route('info.disposal')->with('success', 'Disposal approved by Managing Director successfully!');
     }
 
     public function infoDisposal(Request $request)
@@ -202,6 +225,32 @@ class DisposalController extends Controller
         }
         
         $deletedInventories = $deletedInventoriesQuery->latest()->get();
+
+        // Define department hierarchy for sorting
+        $departmentHierarchy = [
+            'Human Resources' => 1,
+            'Finance' => 2,
+            'Contract' => 3,
+            'Operation' => 4,
+            'Information Technology' => 5,
+            'None' => 6
+        ];
+
+        // Get current user's department
+        $currentUserDepartment = auth()->user()->department->name ?? 'None';
+
+        // Sort deleted inventories by department hierarchy with user's department first
+        $deletedInventories = $deletedInventories->sortBy(function ($item) use ($departmentHierarchy, $currentUserDepartment) {
+            $deptName = $item->department->name ?? 'None';
+            
+            // If it's the user's own department, give it priority 0 (highest)
+            if ($deptName === $currentUserDepartment) {
+                return 0;
+            }
+            
+            // Otherwise use the hierarchy order
+            return $departmentHierarchy[$deptName] ?? 999;
+        })->values(); // Reset array keys
 
         // Get departments for filter
         $departments = Department::all();

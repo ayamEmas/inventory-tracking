@@ -55,6 +55,8 @@ Route::post('/pelupusan/store', [DisposalController::class, 'store'])->middlewar
 # Disposal approval page
 Route::get('/disposal/approval/{id}', [DisposalController::class, 'showApproval'])->middleware(['auth', 'verified'])->name('disposal.approval');
 Route::post('/disposal/approve/{id}', [DisposalController::class, 'approve'])->middleware(['auth', 'verified'])->name('disposal.approve');
+Route::post('/disposal/approve2/{id}', [DisposalController::class, 'approve2'])->middleware(['auth', 'verified'])->name('disposal.approve2');
+Route::post('/disposal/approve3/{id}', [DisposalController::class, 'approve3'])->middleware(['auth', 'verified'])->name('disposal.approve3');
 
 # Info disposal page
 Route::get('/info-disposal', [DisposalController::class, 'infoDisposal'])->middleware(['auth', 'verified'])->name('info.disposal');

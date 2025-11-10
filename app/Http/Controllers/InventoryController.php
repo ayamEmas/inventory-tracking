@@ -43,6 +43,32 @@ class InventoryController extends Controller
 
         $inventories = $query->get();
 
+        // Define department hierarchy for sorting
+        $departmentHierarchy = [
+            'Human Resources' => 1,
+            'Finance' => 2,
+            'Contract' => 3,
+            'Operation' => 4,
+            'Information Technology' => 5,
+            'None' => 6
+        ];
+
+        // Get current user's department
+        $currentUserDepartment = auth()->user()->department->name ?? 'None';
+
+        // Sort inventories by department hierarchy with user's department first
+        $inventories = $inventories->sortBy(function ($inventory) use ($departmentHierarchy, $currentUserDepartment) {
+            $deptName = $inventory->department->name ?? 'None';
+            
+            // If it's the user's own department, give it priority 0 (highest)
+            if ($deptName === $currentUserDepartment) {
+                return 0;
+            }
+            
+            // Otherwise use the hierarchy order
+            return $departmentHierarchy[$deptName] ?? 999;
+        })->values(); // Reset array keys
+
         return view('inventory', compact('departments', 'inventories'));
     }
 
@@ -86,34 +112,48 @@ class InventoryController extends Controller
         // Get year from date
         $year = date('y', strtotime($request->date));
 
-        // Get first 3 letters of asset_cat
-        $assetCatCode = $request->asset_cat;
+        // Get first letter of asset_cat
+        $assetCatCode = substr($request->asset_cat, 0, 1);
+        $asset_location = $request->asset_location;
 
-        // Get the last sequence number for this combination
-        $lastInventory = Inventory::where('asset_location', $request->asset_location)
-            ->where('department_id', $request->department_id)
-            ->where('asset_cat', $request->asset_cat)
-            ->whereYear('date', date('Y', strtotime($request->date)))
-            ->orderBy('id', 'desc')
-            ->first();
+        // Get the last 3 digits of asset_code
+        $assetCodeDigits = substr($request->asset_code, -3);
+        $sequenceStr = str_pad($assetCodeDigits, 3, '0', STR_PAD_LEFT);
 
-        $sequence = $lastInventory ? intval(substr($lastInventory->id_tag, -3)) + 1 : 1;
-        $sequenceStr = str_pad($sequence, 3, '0', STR_PAD_LEFT);
-
-        // Generate id_tag
-        $idTag = "QHSB/HQ/{$departmentCode}/{$assetCatCode}/{$year}/{$sequenceStr}";
+        // Generate id_tag in new format: QHSB/HQ/IT/C/23-092
+        $idTag = "QHSB/{$asset_location}/{$departmentCode}/{$assetCatCode}/{$year}-{$sequenceStr}";
 
         // Add id_tag to validated data
         $validated['id_tag'] = $idTag;
 
         // Handle image upload with id_tag and date as filename
         if ($request->hasFile('image')) {
+            \Log::info('Image upload started', [
+                'hasFile' => $request->hasFile('image'),
+                'file' => $request->file('image'),
+                'id_tag' => $idTag
+            ]);
+            
             $image = $request->file('image');
             $extension = $image->getClientOriginalExtension();
             $dateFormatted = date('Y-m-d', strtotime($request->date));
-            $imageName = $idTag . '_' . $dateFormatted . '.' . $extension;
-            $image->storeAs('public/images', $imageName);
+            // Replace slashes with hyphens in filename to avoid path issues
+            $safeIdTag = str_replace(['/', '\\'], '-', $idTag);
+            $imageName = $safeIdTag . '_' . $dateFormatted . '.' . $extension;
+            
+            \Log::info('Image upload details', [
+                'extension' => $extension,
+                'dateFormatted' => $dateFormatted,
+                'imageName' => $imageName,
+                'storage_path' => storage_path('app/public/images')
+            ]);
+            
+            $storedPath = $image->storeAs('images', $imageName, 'public');
+            \Log::info('Image stored', ['storedPath' => $storedPath]);
+            
             $validated['image'] = $imageName;
+        } else {
+            \Log::info('No image file found in request');
         }
 
         Inventory::create($validated);
@@ -136,6 +176,12 @@ class InventoryController extends Controller
     }
 
     public function update (Request $request, $id) {
+        \Log::info('Update method called', [
+            'id' => $id,
+            'hasFile' => $request->hasFile('image'),
+            'all_data' => $request->all()
+        ]);
+        
         $validated = $request->validate([
             'date' => 'required|date',
             'purchase_order_no' => 'required|string|max:255',
@@ -161,6 +207,8 @@ class InventoryController extends Controller
             'image' => 'nullable|image|mimes:jpeg,png,jpg,gif|max:10240', // 10MB max
         ]);
 
+        \Log::info('Update: Validation passed', ['validated_data' => $validated]);
+
         $inventory = Inventory::findOrFail($id);
 
         // Check if ID tag needs to be regenerated
@@ -184,30 +232,30 @@ class InventoryController extends Controller
             // Get year from date
             $year = date('y', strtotime($request->date));
 
-            // Get first 3 letters of asset_cat
             $assetCatCode = $request->asset_cat;
+            $asset_location = $request->asset_location;
 
-            // Get the last sequence number for this combination
-            $lastInventory = Inventory::where('asset_location', $request->asset_location)
-                ->where('department_id', $request->department_id)
-                ->where('asset_cat', $request->asset_cat)
-                ->whereYear('date', date('Y', strtotime($request->date)))
-                ->where('id', '!=', $inventory->id) // Exclude current inventory
-                ->orderBy('id', 'desc')
-                ->first();
+            // Get the last 3 digits of asset_code
+            $assetCodeDigits = substr($request->asset_code, -3);
+            $sequenceStr = str_pad($assetCodeDigits, 3, '0', STR_PAD_LEFT);
 
-            $sequence = $lastInventory ? intval(substr($lastInventory->id_tag, -3)) + 1 : 1;
-            $sequenceStr = str_pad($sequence, 3, '0', STR_PAD_LEFT);
-
-            // Generate new id_tag
-            $newIdTag = "QHSB/HQ/{$departmentCode}/{$assetCatCode}/{$year}/{$sequenceStr}";
+            // Generate new id_tag in new format: QHSB/HQ/IT/C/23-092
+            $newIdTag = "QHSB/{$asset_location}/{$departmentCode}/{$assetCatCode}/{$year}-{$sequenceStr}";
             $validated['id_tag'] = $newIdTag;
         }
 
         // Handle image upload
         if ($request->hasFile('image')) {
+            \Log::info('Update: Image upload started', [
+                'hasFile' => $request->hasFile('image'),
+                'file' => $request->file('image'),
+                'current_image' => $inventory->image,
+                'needsIdTagUpdate' => $needsIdTagUpdate
+            ]);
+            
             // Delete old image if exists
             if ($inventory->image && Storage::disk('public')->exists('images/' . $inventory->image)) {
+                \Log::info('Update: Deleting old image', ['old_image' => $inventory->image]);
                 Storage::disk('public')->delete('images/' . $inventory->image);
             }
 
@@ -215,9 +263,26 @@ class InventoryController extends Controller
             $image = $request->file('image');
             $extension = $image->getClientOriginalExtension();
             $dateFormatted = date('Y-m-d', strtotime($request->date));
-            $imageName = ($needsIdTagUpdate ? $validated['id_tag'] : $inventory->id_tag) . '_' . $dateFormatted . '.' . $extension;
-            $image->storeAs('public/images', $imageName);
+            // Replace slashes with hyphens in filename to avoid path issues
+            $currentIdTag = $needsIdTagUpdate ? $validated['id_tag'] : $inventory->id_tag;
+            $safeIdTag = str_replace(['/', '\\'], '-', $currentIdTag);
+            $imageName = $safeIdTag . '_' . $dateFormatted . '.' . $extension;
+            
+            \Log::info('Update: Image upload details', [
+                'extension' => $extension,
+                'dateFormatted' => $dateFormatted,
+                'currentIdTag' => $currentIdTag,
+                'safeIdTag' => $safeIdTag,
+                'imageName' => $imageName,
+                'storage_path' => storage_path('app/public/images')
+            ]);
+            
+            $storedPath = $image->storeAs('images', $imageName, 'public');
+            \Log::info('Update: Image stored', ['storedPath' => $storedPath]);
+            
             $validated['image'] = $imageName;
+        } else {
+            \Log::info('Update: No image file found in request');
         }
 
         $inventory->update($validated);
@@ -410,6 +475,41 @@ class InventoryController extends Controller
         }
 
         $deletedItems = $query->orderBy('deleted_at', 'desc')->get();
+        
+        // Load disposal records for each deleted item
+        $deletedItems->each(function ($item) {
+            $disposal = \App\Models\Disposal::where('registrationSerialNum', $item->serial_num)
+                ->orWhere('registrationSerialNum', $item->id_tag)
+                ->first();
+            $item->disposal = $disposal;
+        });
+
+        // Define department hierarchy for sorting
+        $departmentHierarchy = [
+            'Human Resources' => 1,
+            'Finance' => 2,
+            'Contract' => 3,
+            'Operation' => 4,
+            'Information Technology' => 5,
+            'None' => 6
+        ];
+
+        // Get current user's department
+        $currentUserDepartment = auth()->user()->department->name ?? 'None';
+
+        // Sort deleted items by department hierarchy with user's department first
+        $deletedItems = $deletedItems->sortBy(function ($item) use ($departmentHierarchy, $currentUserDepartment) {
+            $deptName = $item->department->name ?? 'None';
+            
+            // If it's the user's own department, give it priority 0 (highest)
+            if ($deptName === $currentUserDepartment) {
+                return 0;
+            }
+            
+            // Otherwise use the hierarchy order
+            return $departmentHierarchy[$deptName] ?? 999;
+        })->values(); // Reset array keys
+        
         $departments = Department::all();
 
         return view('deleted-inventory', compact('deletedItems', 'departments'));
@@ -417,6 +517,11 @@ class InventoryController extends Controller
 
     public function restore($id)
     {
+        // Only Admin System can restore items
+        if (auth()->user()->role !== 'Admin System') {
+            abort(403, 'Unauthorized action. Only Admin System can restore items.');
+        }
+        
         $deletedItem = DeletedInventory::findOrFail($id);
         
         // Create a new record in inventories
@@ -445,9 +550,18 @@ class InventoryController extends Controller
             'id_tag' => $deletedItem->id_tag,
         ]);
 
+        // Delete corresponding disposal record if it exists
+        $disposal = \App\Models\Disposal::where('registrationSerialNum', $deletedItem->serial_num)
+            ->orWhere('registrationSerialNum', $deletedItem->id_tag)
+            ->first();
+            
+        if ($disposal) {
+            $disposal->delete();
+        }
+
         // Delete from deleted_inventories
         $deletedItem->delete();
 
-        return redirect()->route('inventories.deleted')->with('success', 'Item has been restored successfully!');
+        return redirect()->route('inventories.deleted')->with('success', 'Item has been restored successfully! Disposal record has been removed.');
     }
 }

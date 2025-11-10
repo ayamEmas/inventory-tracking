@@ -34,7 +34,7 @@
                                     </svg>
                                     Download PDF
                                 </button>
-                                <div x-show="open" 
+                                <div x-show="open"
                                      @click.away="open = false"
                                      class="absolute right-0 mt-2 w-48 bg-white rounded-lg shadow-lg py-2 z-50">
                                     <a href="{{ route('inventories.download-pdf', ['type' => 'all']) }}" class="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">Download All</a>
@@ -123,7 +123,7 @@
                     </div>
 
                     <!-- PC Display with Animation -->
-                    <div x-data="{ show: false }" 
+                    <div x-data="{ show: false }"
                          x-init="setTimeout(() => show = true, 600)"
                          x-show="show"
                          x-transition:enter="transition ease-out duration-500"
@@ -161,7 +161,7 @@
                                         </svg>
                                     </button>
                                 </div>
-                                <div x-show="open" 
+                                <div x-show="open"
                                      x-transition:enter="transition ease-out duration-300"
                                      x-transition:enter-start="opacity-0 transform -translate-y-2"
                                      x-transition:enter-end="opacity-100 transform translate-y-0"
@@ -191,7 +191,7 @@
                                                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
                                                             </svg>
                                                             <span class="absolute -top-8 left-1/2 transform -translate-x-1/2 bg-gray-800 text-white text-xs px-2 py-1 rounded opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
-                                                                Edit
+                                                                Edit & Details
                                                             </span>
                                                         </a>
                                                         <a href="{{ route('inventories.download-qr', $inventory->id) }}" class="inline-block transform hover:-translate-y-1 transition-transform duration-300 group relative">
