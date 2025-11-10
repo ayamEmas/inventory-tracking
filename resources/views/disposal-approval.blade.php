@@ -215,7 +215,13 @@
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-600">Date</label>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $deletedInventory->date->format('M d, Y') }}</p>
+                                    @php
+                                        $inventoryDateValue = data_get($deletedInventory, 'date');
+                                        $inventoryDateFormatted = $inventoryDateValue
+                                            ? \Illuminate\Support\Carbon::parse($inventoryDateValue)->format('M d, Y')
+                                            : 'N/A';
+                                    @endphp
+                                    <p class="mt-1 text-sm text-gray-900">{{ $inventoryDateFormatted }}</p>
                                 </div>
                             </div>
                             
@@ -270,7 +276,13 @@
                             
                             <div>
                                 <label class="block text-sm font-medium text-gray-600">Application Disposal Submitted At</label>
-                                <p class="mt-1 text-sm text-gray-900">{{ $deletedInventory->deleted_at->format('M d, Y H:i') }}</p>
+                                @php
+                                    $deletedAtValue = data_get($deletedInventory, 'deleted_at');
+                                    $deletedAtFormatted = $deletedAtValue
+                                        ? \Illuminate\Support\Carbon::parse($deletedAtValue)->format('M d, Y H:i')
+                                        : 'Pending Approval';
+                                @endphp
+                                <p class="mt-1 text-sm text-gray-900">{{ $deletedAtFormatted }}</p>
                             </div>
                         </div>
                     </div>
@@ -297,7 +309,13 @@
                             <div class="grid grid-cols-2 gap-4">
                                 <div>
                                     <label class="block text-sm font-medium text-gray-600">Acquisition Date</label>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $disposal->acquisitionDate->format('M d, Y') }}</p>
+                                    @php
+                                        $acquisitionDateValue = data_get($disposal, 'acquisitionDate');
+                                        $acquisitionDateFormatted = $acquisitionDateValue
+                                            ? \Illuminate\Support\Carbon::parse($acquisitionDateValue)->format('M d, Y')
+                                            : 'N/A';
+                                    @endphp
+                                    <p class="mt-1 text-sm text-gray-900">{{ $acquisitionDateFormatted }}</p>
                                 </div>
                                 <div>
                                     <label class="block text-sm font-medium text-gray-600">Asset Age</label>
@@ -518,5 +536,26 @@
                 @endif
             @endif
         </div>
+
+        @if($disposal->picture_path)
+            <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 mt-10">
+                <div class="bg-white rounded-lg shadow-md overflow-hidden">
+                    <div class="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
+                        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide">Submitted Asset Picture</h3>
+                        <a href="{{ asset('storage/' . $disposal->picture_path) }}" target="_blank" class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                            View full size
+                        </a>
+                    </div>
+                    <div class="p-3 bg-gray-50 flex justify-center">
+                        <div class="max-w-md w-full">
+                            <img src="{{ asset('storage/' . $disposal->picture_path) }}" alt="Asset picture" class="w-full max-h-56 object-contain rounded-md border border-gray-200 shadow-sm bg-white">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        @endif
     </div>
 </x-app-layout> 

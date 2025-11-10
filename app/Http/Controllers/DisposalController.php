@@ -36,10 +36,24 @@ class DisposalController extends Controller
             $disposalData = \App\Models\Disposal::where('registrationSerialNum', $deletedInventory->serial_num)
                 ->orWhere('registrationSerialNum', $deletedInventory->id_tag)
                 ->latest()->first();
+
+            $remarks = $disposalData
+                ? collect([$disposalData->remarks1, $disposalData->remarks2, $disposalData->remarks3])
+                : collect();
+
+            $hasRejection = $disposalData && $remarks->contains(2);
+            $allApproved = $disposalData && $remarks->filter(fn ($remark) => !is_null($remark))->count() === 3
+                && $remarks->every(fn ($remark) => $remark === 1);
+
             return view('pelupusan', [
+                'record' => $deletedInventory,
                 'deletedInventory' => $deletedInventory,
-                'isDisposed' => true,
+                'inventory' => null,
+                'isDisposed' => $allApproved,
                 'disposalData' => $disposalData,
+                'showForm' => false,
+                'showStatus' => $disposalData && !$hasRejection,
+                'disposalRejected' => $hasRejection,
             ]);
         }
 
@@ -48,7 +62,31 @@ class DisposalController extends Controller
             return back()->withErrors(['id_tag' => 'Inventory with this ID tag not found.']);
         }
 
-        return view('pelupusan', compact('inventory'));
+        $disposalData = \App\Models\Disposal::where('registrationSerialNum', $inventory->serial_num)
+            ->orWhere('registrationSerialNum', $inventory->id_tag)
+            ->latest()
+            ->first();
+
+        $remarks = $disposalData
+            ? collect([$disposalData->remarks1, $disposalData->remarks2, $disposalData->remarks3])
+            : collect();
+
+        $hasRejection = $disposalData && $remarks->contains(2);
+        $allApproved = $disposalData && $remarks->filter(fn ($remark) => !is_null($remark))->count() === 3
+            && $remarks->every(fn ($remark) => $remark === 1);
+
+        $showForm = !$disposalData || $hasRejection;
+        $showStatus = $disposalData && !$hasRejection;
+
+        return view('pelupusan', [
+            'inventory' => $inventory,
+            'record' => $inventory,
+            'disposalData' => $disposalData,
+            'isDisposed' => $allApproved,
+            'showForm' => $showForm,
+            'showStatus' => $showStatus,
+            'disposalRejected' => $hasRejection,
+        ]);
     }
 
     public function store(Request $request)
@@ -64,7 +102,33 @@ class DisposalController extends Controller
             'disposalMethod' => 'required|string|max:255',
             'justification' => 'required|string|max:255',
             'notes' => 'nullable|string|max:255',
+            'picture' => 'nullable|image|mimes:jpeg,png,jpg,gif,webp|max:10240',
         ]);
+
+        $inventory = Inventory::where('serial_num', $request->registrationSerialNum)
+            ->orWhere('id_tag', $request->registrationSerialNum)
+            ->first();
+
+        if (!$inventory) {
+            return back()->withErrors(['registrationSerialNum' => 'No inventory found with this registration serial number.']);
+        }
+
+        $existingDisposal = Disposal::where('registrationSerialNum', $inventory->serial_num)
+            ->orWhere('registrationSerialNum', $inventory->id_tag)
+            ->latest()
+            ->first();
+
+        if ($existingDisposal) {
+            $statuses = collect([$existingDisposal->remarks1, $existingDisposal->remarks2, $existingDisposal->remarks3]);
+
+            if ($statuses->contains(2)) {
+                // Allow a new submission if the previous one was rejected by any supervisor.
+            } elseif ($statuses->contains(null)) {
+                return back()->withErrors(['registrationSerialNum' => 'A disposal request for this asset is already pending approval.']);
+            } else {
+                return back()->withErrors(['registrationSerialNum' => 'This asset has already been fully approved for disposal.']);
+            }
+        }
 
         $disposalData = $request->only([
             'registrationSerialNum',
@@ -78,6 +142,10 @@ class DisposalController extends Controller
             'justification',
             'notes',
         ]);
+
+        if ($request->hasFile('picture')) {
+            $disposalData['picture_path'] = $request->file('picture')->store('disposals', 'public');
+        }
 
         // Set supervisor values manually
         $disposalData['supervisor1'] = 5; // Set supervisor ID
@@ -108,44 +176,20 @@ class DisposalController extends Controller
             Log::info('DisposalController@store: Creating disposal record');
             Disposal::create($disposalData);
 
-            Log::info('DisposalController@store: Creating deleted inventory record');
-            DeletedInventory::create([
-                'date' => $inventory->date,
-                'purchase_order_no' => $inventory->purchase_order_no,
-                'supplier_name' => $inventory->supplier_name,
-                'supplier_email' => $inventory->supplier_email,
-                'supplier_address' => $inventory->supplier_address,
-                'supplier_contactno' => $inventory->supplier_contactno,
-                'supplier_faxno' => $inventory->supplier_faxno,
-                'department_id' => $inventory->department_id,
-                'asset_location' => $inventory->asset_location,
-                'asset_to' => $inventory->asset_to,
-                'asset_code' => $inventory->asset_code,
-                'asset_cat' => $inventory->asset_cat,
-                'asset_type' => $inventory->asset_type,
-                'item_location' => $inventory->item_location,
-                'serial_num' => $inventory->serial_num,
-                'microsoft_office' => $inventory->microsoft_office,
-                'tel_number' => $inventory->tel_number,
-                'nos' => $inventory->nos,
-                'description' => $inventory->description,
-                'amount' => $inventory->amount,
-                'item' => $inventory->item,
-                'id_tag' => $inventory->id_tag,
-                'deleted_at' => now()
-            ]);
-
-            Log::info('DisposalController@store: Deleting inventory record', ['id' => $inventory->id]);
-            $inventory->delete();
+            Log::info('DisposalController@store: Creating/updating deleted inventory snapshot');
+            DeletedInventory::updateOrCreate(
+                ['id_tag' => $inventory->id_tag],
+                $this->deletedInventoryDataFrom($inventory, now())
+            );
 
             DB::commit();
             Log::info('DisposalController@store: Success');
             
             // Add debugging
-            session()->flash('success', 'Disposal form submitted successfully! Inventory has been moved to deleted items.');
+            session()->flash('success', 'Disposal form submitted successfully! The request is now pending supervisor approvals.');
             Log::info('DisposalController@store: Success message set', ['session_id' => session()->getId()]);
             
-            return back()->with('success', 'Disposal form submitted successfully! Inventory has been moved to deleted items.');
+            return back()->with('success', 'Disposal form submitted successfully! The request is now pending supervisor approvals.');
         } catch (\Exception $e) {
             DB::rollBack();
             Log::error('DisposalController@store: Exception', ['error' => $e->getMessage(), 'trace' => $e->getTraceAsString()]);
@@ -160,7 +204,13 @@ class DisposalController extends Controller
         // Find the deleted inventory record
         $deletedInventory = DeletedInventory::where('serial_num', $disposal->registrationSerialNum)
             ->orWhere('id_tag', $disposal->registrationSerialNum)
-            ->firstOrFail();
+            ->first();
+
+        if (!$deletedInventory) {
+            $deletedInventory = Inventory::where('serial_num', $disposal->registrationSerialNum)
+                ->orWhere('id_tag', $disposal->registrationSerialNum)
+                ->firstOrFail();
+        }
 
         return view('disposal-approval', compact('disposal', 'deletedInventory'));
     }
@@ -172,6 +222,8 @@ class DisposalController extends Controller
         $disposal->update([
             'remarks1' => $request->remarks1,
         ]);
+        $disposal->refresh();
+        $this->finalizeDisposal($disposal);
 
         return redirect()->route('info.disposal')->with('success', 'Disposal approved successfully!');
     }
@@ -183,6 +235,8 @@ class DisposalController extends Controller
         $disposal->update([
             'remarks2' => $request->remarks2,
         ]);
+        $disposal->refresh();
+        $this->finalizeDisposal($disposal);
 
         return redirect()->route('info.disposal')->with('success', 'Disposal approved by General Manager successfully!');
     }
@@ -194,8 +248,53 @@ class DisposalController extends Controller
         $disposal->update([
             'remarks3' => $request->remarks3,
         ]);
+        $disposal->refresh();
+        $this->finalizeDisposal($disposal);
 
         return redirect()->route('info.disposal')->with('success', 'Disposal approved by Managing Director successfully!');
+    }
+
+    protected function finalizeDisposal(Disposal $disposal): void
+    {
+        $remarks = [$disposal->remarks1, $disposal->remarks2, $disposal->remarks3];
+
+        if (in_array(2, $remarks, true)) {
+            Log::info('DisposalController@finalizeDisposal: Disposal rejected by at least one supervisor, inventory remains.', ['disposal_id' => $disposal->id]);
+            return;
+        }
+
+        if (!collect($remarks)->every(fn ($remark) => $remark === 1)) {
+            // Still pending approvals.
+            return;
+        }
+
+        $inventory = Inventory::where('serial_num', $disposal->registrationSerialNum)
+            ->orWhere('id_tag', $disposal->registrationSerialNum)
+            ->first();
+
+        DB::transaction(function () use ($inventory, $disposal) {
+            if ($inventory) {
+                Log::info('DisposalController@finalizeDisposal: Updating deleted inventory snapshot and removing original record.', ['inventory_id' => $inventory->id]);
+
+                DeletedInventory::updateOrCreate(
+                    ['id_tag' => $inventory->id_tag],
+                    $this->deletedInventoryDataFrom($inventory, now())
+                );
+
+                $inventory->delete();
+            } else {
+                $updated = DeletedInventory::where('id_tag', $disposal->registrationSerialNum)
+                    ->orWhere('serial_num', $disposal->registrationSerialNum)
+                    ->update(['deleted_at' => now()]);
+
+                if ($updated === 0) {
+                    Log::warning('DisposalController@finalizeDisposal: No inventory or deleted snapshot found to update.', [
+                        'disposal_id' => $disposal->id,
+                        'registrationSerialNum' => $disposal->registrationSerialNum,
+                    ]);
+                }
+            }
+        });
     }
 
     public function infoDisposal(Request $request)
@@ -259,5 +358,34 @@ class DisposalController extends Controller
         $disposalMethods = Disposal::distinct()->pluck('disposalMethod')->filter()->values();
 
         return view('info-disposal', compact('disposals', 'deletedInventories', 'departments', 'disposalMethods'));
+    }
+
+    protected function deletedInventoryDataFrom(Inventory $inventory, $deletedAt)
+    {
+        return [
+            'date' => $inventory->date,
+            'purchase_order_no' => $inventory->purchase_order_no,
+            'supplier_name' => $inventory->supplier_name,
+            'supplier_email' => $inventory->supplier_email,
+            'supplier_address' => $inventory->supplier_address,
+            'supplier_contactno' => $inventory->supplier_contactno,
+            'supplier_faxno' => $inventory->supplier_faxno,
+            'department_id' => $inventory->department_id,
+            'asset_location' => $inventory->asset_location,
+            'asset_to' => $inventory->asset_to,
+            'asset_code' => $inventory->asset_code,
+            'asset_cat' => $inventory->asset_cat,
+            'asset_type' => $inventory->asset_type,
+            'item_location' => $inventory->item_location,
+            'serial_num' => $inventory->serial_num,
+            'microsoft_office' => $inventory->microsoft_office,
+            'tel_number' => $inventory->tel_number,
+            'nos' => $inventory->nos,
+            'description' => $inventory->description,
+            'amount' => $inventory->amount,
+            'item' => $inventory->item,
+            'id_tag' => $inventory->id_tag,
+            'deleted_at' => $deletedAt,
+        ];
     }
 }

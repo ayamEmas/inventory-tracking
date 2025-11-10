@@ -41,7 +41,9 @@ class InventoryController extends Controller
             $query->whereYear('date', $request->year_filter);
         }
 
-        $inventories = $query->get();
+        $inventories = $query
+            ->orderByDesc('created_at')
+            ->get();
 
         // Define department hierarchy for sorting
         $departmentHierarchy = [

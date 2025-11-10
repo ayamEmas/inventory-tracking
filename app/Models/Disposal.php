@@ -18,6 +18,7 @@ class Disposal extends Model
         'disposalMethod',
         'justification',
         'notes',
+        'picture_path',
         'supervisor1',
         'supervisor2',
         'supervisor3',

@@ -36,6 +36,14 @@
                         }
                     @endphp
                     
+                    @php
+                        $record = $record ?? null;
+                        $showForm = $showForm ?? false;
+                        $showStatus = $showStatus ?? false;
+                        $disposalRejected = $disposalRejected ?? false;
+                        $isDisposed = $isDisposed ?? false;
+                    @endphp
+                    
                     <!-- Success/Error Messages -->
                     @if(session('success'))
                         <div class="mb-6 p-6 bg-green-50 border-2 border-green-200 text-green-800 rounded-lg shadow-sm" style="position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 9999; min-width: 400px; max-width: 600px;">
@@ -114,7 +122,13 @@
                     </div>
 
                     <!-- Inventory Display -->
-                    @if(isset($inventory))
+                    @if(isset($inventory) && $showForm)
+                        @if($disposalRejected)
+                            <div class="mb-6 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                                The previous disposal request for this asset was rejected. Please review the details and resubmit the form.
+                            </div>
+                        @endif
+
                         <div class="bg-gray-50 rounded-lg p-6">
                             <h3 class="text-xl font-semibold text-gray-800 mb-6">Inventory Details</h3>
                             
@@ -250,7 +264,7 @@
                             <div class="mt-8 pt-6 border-t border-gray-200">
                                 <h3 class="text-xl font-semibold text-gray-800 mb-6">Disposal Form</h3>
 
-                                <form method="POST" action="{{ route('pelupusan.store') }}" class="space-y-6">
+                                <form method="POST" action="{{ route('pelupusan.store') }}" enctype="multipart/form-data" class="space-y-6">
                                     @csrf
                                     
                                     <!-- Asset Information Section -->
@@ -346,6 +360,19 @@
                                                     placeholder="Any additional notes...">{{ old('notes') }}</textarea>
                                                 <x-input-error :messages="$errors->get('notes')" class="mt-2" />
                                             </div>
+                                            
+                                            <div class="md:col-span-2">
+                                                <x-input-label for="picture" value="Asset Picture" />
+                                                <input
+                                                    id="picture"
+                                                    name="picture"
+                                                    type="file"
+                                                    accept="image/*"
+                                                    class="mt-1 block w-full text-sm text-gray-700 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-indigo-700"
+                                                />
+                                                <p class="mt-2 text-xs text-gray-500">Supported formats: JPG, PNG, GIF, WEBP. Max size 10MB.</p>
+                                                <x-input-error :messages="$errors->get('picture')" class="mt-2" />
+                                            </div>
                                         </div>
                                     </div>
 
@@ -363,7 +390,7 @@
                         </div>
                     @endif
 
-                    @if(isset($isDisposed) && $isDisposed && isset($deletedInventory))
+                    @if(isset($disposalData) && $disposalData && $showStatus)
                         <div class="max-w-4xl mx-auto my-8">
                             @php
                                 // Check if all supervisors have approved
@@ -393,7 +420,7 @@
                                          </span>
                                      </div>
                                      <h2 class="text-2xl font-bold text-red-600 mb-2 text-center mt-4">This disposal has been rejected by supervisor</h2>
-                                     <p class="text-center text-gray-700 mb-8">ID Tag: <span class="font-semibold">{{ $deletedInventory->id_tag }}</span></p>
+                                    <p class="text-center text-gray-700 mb-8">ID Tag: <span class="font-semibold">{{ $record?->id_tag }}</span></p>
                                      
                                      <!-- Approval Status Section - Only show for rejection case -->
                                      <div class="mb-8">
@@ -497,22 +524,22 @@
                                      </div>
                                      
                                      <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
-                                         <div>
-                                             <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Inventory Details</h3>
-                                             <ul class="text-gray-800 space-y-1">
-                                                 <li><span class="font-medium text-gray-500">Item:</span> {{ $deletedInventory->item }}</li>
-                                                 <li><span class="font-medium text-gray-500">Description:</span> {{ $deletedInventory->description }}</li>
-                                                 <li><span class="font-medium text-gray-500">Quantity:</span> {{ $deletedInventory->nos }}</li>
-                                                 <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format($deletedInventory->amount, 2) }}</li>
-                                                 <li><span class="font-medium text-gray-500">Asset Code:</span> {{ $deletedInventory->asset_code }}</li>
-                                                 <li><span class="font-medium text-gray-500">Asset Category:</span> {{ getAssetCategoryName($deletedInventory->asset_cat, $assetCategories) }}</li>
-                                                 <li><span class="font-medium text-gray-500">Asset Type:</span> {{ $deletedInventory->asset_type }}</li>
-                                                 <li><span class="font-medium text-gray-500">Serial Number:</span> {{ $deletedInventory->serial_num }}</li>
-                                                 <li><span class="font-medium text-gray-500">Asset Location:</span> {{ $deletedInventory->asset_location }}</li>
-                                                 <li><span class="font-medium text-gray-500">Department:</span> {{ $deletedInventory->department->name ?? 'N/A' }}</li>
-                                                 <li><span class="font-medium text-gray-500">Date:</span> {{ $deletedInventory->date }}</li>
-                                             </ul>
-                                         </div>
+                                        <div>
+                                            <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Inventory Details</h3>
+                                            <ul class="text-gray-800 space-y-1">
+                                                <li><span class="font-medium text-gray-500">Item:</span> {{ $record?->item }}</li>
+                                                <li><span class="font-medium text-gray-500">Description:</span> {{ $record?->description }}</li>
+                                                <li><span class="font-medium text-gray-500">Quantity:</span> {{ $record?->nos }}</li>
+                                                <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format(optional($record)->amount ?? 0, 2) }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Code:</span> {{ $record?->asset_code }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Category:</span> {{ getAssetCategoryName(optional($record)->asset_cat, $assetCategories) }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Type:</span> {{ $record?->asset_type }}</li>
+                                                <li><span class="font-medium text-gray-500">Serial Number:</span> {{ $record?->serial_num }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Location:</span> {{ $record?->asset_location }}</li>
+                                                <li><span class="font-medium text-gray-500">Department:</span> {{ optional(optional($record)->department)->name ?? 'N/A' }}</li>
+                                                <li><span class="font-medium text-gray-500">Date:</span> {{ optional(optional($record)->date)->format('Y-m-d') ?? optional($record)->date }}</li>
+                                            </ul>
+                                        </div>
                                          @if(isset($disposalData) && $disposalData)
                                          <div>
                                              <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Disposal Record</h3>
@@ -531,6 +558,18 @@
                                                  </li>
                                                  <li><span class="font-medium text-gray-500">Justification:</span> {{ $disposalData->justification }}</li>
                                                  <li><span class="font-medium text-gray-500">Notes:</span> {{ $disposalData->notes }}</li>
+                                                 @if(!empty($disposalData->picture_path))
+                                                 <li class="space-y-2">
+                                                     <span class="font-medium text-gray-500 block">Asset Picture:</span>
+                                                     <img src="{{ asset('storage/' . $disposalData->picture_path) }}" alt="Asset picture" class="max-h-48 rounded-lg border border-gray-200 shadow-sm">
+                                                     <a href="{{ asset('storage/' . $disposalData->picture_path) }}" target="_blank" class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+                                                         <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                         </svg>
+                                                         View full size
+                                                     </a>
+                                                 </li>
+                                                 @endif
                                              </ul>
                                          </div>
                                          @endif
@@ -541,7 +580,7 @@
                                          </span>
                                      </div>
                                  </div>
-                             @elseif($allApproved)
+                            @elseif($allApproved && $isDisposed && $record)
                                 <div class="rounded-xl border-2 border-green-500 bg-white shadow-lg p-8 relative">
                                     <div class="absolute -top-6 left-1/2 -translate-x-1/2 flex items-center gap-2">
                                         <span class="inline-flex items-center px-3 py-1 rounded-full bg-green-500 text-white font-bold text-sm shadow">
@@ -552,22 +591,22 @@
                                         </span>
                                     </div>
                                     <h2 class="text-2xl font-bold text-green-600 mb-2 text-center mt-4">This item has been fully approved and disposed</h2>
-                                    <p class="text-center text-gray-700 mb-8">ID Tag: <span class="font-semibold">{{ $deletedInventory->id_tag }}</span></p>
+                                    <p class="text-center text-gray-700 mb-8">ID Tag: <span class="font-semibold">{{ $record?->id_tag }}</span></p>
                                     <div class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
                                         <div>
                                             <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Inventory Details</h3>
                                             <ul class="text-gray-800 space-y-1">
-                                                <li><span class="font-medium text-gray-500">Item:</span> {{ $deletedInventory->item }}</li>
-                                                <li><span class="font-medium text-gray-500">Description:</span> {{ $deletedInventory->description }}</li>
-                                                <li><span class="font-medium text-gray-500">Quantity:</span> {{ $deletedInventory->nos }}</li>
-                                                <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format($deletedInventory->amount, 2) }}</li>
-                                                <li><span class="font-medium text-gray-500">Asset Code:</span> {{ $deletedInventory->asset_code }}</li>
-                                                <li><span class="font-medium text-gray-500">Asset Category:</span> {{ getAssetCategoryName($deletedInventory->asset_cat, $assetCategories) }}</li>
-                                                <li><span class="font-medium text-gray-500">Asset Type:</span> {{ $deletedInventory->asset_type }}</li>
-                                                <li><span class="font-medium text-gray-500">Serial Number:</span> {{ $deletedInventory->serial_num }}</li>
-                                                <li><span class="font-medium text-gray-500">Asset Location:</span> {{ $deletedInventory->asset_location }}</li>
-                                                <li><span class="font-medium text-gray-500">Department:</span> {{ $deletedInventory->department->name ?? 'N/A' }}</li>
-                                                <li><span class="font-medium text-gray-500">Date:</span> {{ $deletedInventory->date }}</li>
+                                                <li><span class="font-medium text-gray-500">Item:</span> {{ $record?->item }}</li>
+                                                <li><span class="font-medium text-gray-500">Description:</span> {{ $record?->description }}</li>
+                                                <li><span class="font-medium text-gray-500">Quantity:</span> {{ $record?->nos }}</li>
+                                                <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format(optional($record)->amount ?? 0, 2) }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Code:</span> {{ $record?->asset_code }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Category:</span> {{ getAssetCategoryName(optional($record)->asset_cat, $assetCategories) }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Type:</span> {{ $record?->asset_type }}</li>
+                                                <li><span class="font-medium text-gray-500">Serial Number:</span> {{ $record?->serial_num }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Location:</span> {{ $record?->asset_location }}</li>
+                                                <li><span class="font-medium text-gray-500">Department:</span> {{ optional(optional($record)->department)->name ?? 'N/A' }}</li>
+                                                <li><span class="font-medium text-gray-500">Date:</span> {{ optional(optional($record)->date)->format('Y-m-d') ?? optional($record)->date }}</li>
                                             </ul>
                                         </div>
                                         @if(isset($disposalData) && $disposalData)
@@ -588,6 +627,18 @@
                                                 </li>
                                                 <li><span class="font-medium text-gray-500">Justification:</span> {{ $disposalData->justification }}</li>
                                                 <li><span class="font-medium text-gray-500">Notes:</span> {{ $disposalData->notes }}</li>
+                                                @if(!empty($disposalData->picture_path))
+                                                <li class="space-y-2">
+                                                    <span class="font-medium text-gray-500 block">Asset Picture:</span>
+                                                    <img src="{{ asset('storage/' . $disposalData->picture_path) }}" alt="Asset picture" class="max-h-48 rounded-lg border border-gray-200 shadow-sm">
+                                                    <a href="{{ asset('storage/' . $disposalData->picture_path) }}" target="_blank" class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                        </svg>
+                                                        View full size
+                                                    </a>
+                                                </li>
+                                                @endif
                                             </ul>
                                         </div>
                                         @endif
@@ -614,8 +665,8 @@
                                             Pending Approval
                                         </span>
                                     </div>
-                                    <h2 class="text-2xl font-bold text-yellow-600 mb-2 text-center mt-4">This item has been disposed - Pending Approval</h2>
-                                    <p class="text-center text-gray-700 mb-8">ID Tag: <span class="font-semibold">{{ $deletedInventory->id_tag }}</span></p>
+                                    <h2 class="text-2xl font-bold text-yellow-600 mb-2 text-center mt-4">Disposal request pending supervisor approval</h2>
+                                    <p class="text-center text-gray-700 mb-8">ID Tag: <span class="font-semibold">{{ $record?->id_tag }}</span></p>
                                     
                                     <!-- Approval Status Section -->
                                     <div class="mb-8">
@@ -756,17 +807,17 @@
                                         <div>
                                             <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Inventory Details</h3>
                                             <ul class="text-gray-800 space-y-1">
-                                                <li><span class="font-medium text-gray-500">Item:</span> {{ $deletedInventory->item }}</li>
-                                                <li><span class="font-medium text-gray-500">Description:</span> {{ $deletedInventory->description }}</li>
-                                                <li><span class="font-medium text-gray-500">Quantity:</span> {{ $deletedInventory->nos }}</li>
-                                                <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format($deletedInventory->amount, 2) }}</li>
-                                                <li><span class="font-medium text-gray-500">Asset Code:</span> {{ $deletedInventory->asset_code }}</li>
-                                                <li><span class="font-medium text-gray-500">Asset Category:</span> {{ getAssetCategoryName($deletedInventory->asset_cat, $assetCategories) }}</li>
-                                                <li><span class="font-medium text-gray-500">Asset Type:</span> {{ $deletedInventory->asset_type }}</li>
-                                                <li><span class="font-medium text-gray-500">Serial Number:</span> {{ $deletedInventory->serial_num }}</li>
-                                                <li><span class="font-medium text-gray-500">Asset Location:</span> {{ $deletedInventory->asset_location }}</li>
-                                                <li><span class="font-medium text-gray-500">Department:</span> {{ $deletedInventory->department->name ?? 'N/A' }}</li>
-                                                <li><span class="font-medium text-gray-500">Date:</span> {{ $deletedInventory->date }}</li>
+                                                <li><span class="font-medium text-gray-500">Item:</span> {{ $record?->item }}</li>
+                                                <li><span class="font-medium text-gray-500">Description:</span> {{ $record?->description }}</li>
+                                                <li><span class="font-medium text-gray-500">Quantity:</span> {{ $record?->nos }}</li>
+                                                <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format(optional($record)->amount ?? 0, 2) }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Code:</span> {{ $record?->asset_code }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Category:</span> {{ getAssetCategoryName(optional($record)->asset_cat, $assetCategories) }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Type:</span> {{ $record?->asset_type }}</li>
+                                                <li><span class="font-medium text-gray-500">Serial Number:</span> {{ $record?->serial_num }}</li>
+                                                <li><span class="font-medium text-gray-500">Asset Location:</span> {{ $record?->asset_location }}</li>
+                                                <li><span class="font-medium text-gray-500">Department:</span> {{ optional(optional($record)->department)->name ?? 'N/A' }}</li>
+                                                <li><span class="font-medium text-gray-500">Date:</span> {{ optional(optional($record)->date)->format('Y-m-d') ?? optional($record)->date }}</li>
                                             </ul>
                                         </div>
                                         @if(isset($disposalData) && $disposalData)
@@ -787,6 +838,18 @@
                                                 </li>
                                                 <li><span class="font-medium text-gray-500">Justification:</span> {{ $disposalData->justification }}</li>
                                                 <li><span class="font-medium text-gray-500">Notes:</span> {{ $disposalData->notes }}</li>
+                                                @if(!empty($disposalData->picture_path))
+                                                <li class="space-y-2">
+                                                    <span class="font-medium text-gray-500 block">Asset Picture:</span>
+                                                    <img src="{{ asset('storage/' . $disposalData->picture_path) }}" alt="Asset picture" class="max-h-48 rounded-lg border border-gray-200 shadow-sm">
+                                                    <a href="{{ asset('storage/' . $disposalData->picture_path) }}" target="_blank" class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+                                                        <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                        </svg>
+                                                        View full size
+                                                    </a>
+                                                </li>
+                                                @endif
                                             </ul>
                                         </div>
                                         @endif
