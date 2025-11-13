@@ -9,6 +9,7 @@ class Disposal extends Model
     
     protected $fillable = [
         'registrationSerialNum',
+        'id_tag',
         'assetDescrip',
         'acquisitionDate',
         'assetAge',
@@ -42,7 +43,11 @@ class Disposal extends Model
 
     public function deletedInventory()
     {
-        return $this->hasOne(DeletedInventory::class, 'serial_num', 'registrationSerialNum')
-            ->orWhere('id_tag', $this->registrationSerialNum);
+        return $this->hasOne(DeletedInventory::class, 'id_tag', 'id_tag');
     }
-} 
+
+    public function inventory()
+    {
+        return $this->belongsTo(Inventory::class, 'registrationSerialNum', 'serial_num');
+    }
+}

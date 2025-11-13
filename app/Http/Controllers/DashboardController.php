@@ -14,7 +14,7 @@ class DashboardController extends Controller
     public function index()
     {
         $users = User::with('department')->get();
-        $inventories = Inventory::with('department')->get();
+        $inventories = Inventory::with('department')->where('check', 1)->get();
         $deletedItems = DeletedInventory::with('department')->get();
         
         // Calculate department distribution with categories
@@ -47,6 +47,60 @@ class DashboardController extends Controller
                 ];
             });
 
-        return view('dashboard', compact('users', 'inventories', 'departmentDistribution', 'deletedItems'));
+        // Calculate asset category distribution across all inventories
+        $categoryNames = [
+            'B' => 'Building',
+            'MV' => 'Motor Vehicle',
+            'M' => 'Machinery',
+            'FF' => 'Furniture & Fitting',
+            'SE' => 'Site Equipment',
+            'OE' => 'Office Equipment',
+            'C' => 'Computer',
+        ];
+
+        $categoryDistributionRaw = $inventories
+            ->groupBy('asset_cat')
+            ->map(function ($group) use ($inventories, $categoryNames) {
+                $totalInventories = $inventories->count();
+                $count = $group->count();
+                $percentage = $totalInventories > 0 ? round(($count / $totalInventories) * 100) : 0;
+                $totalAmount = $group->sum('amount');
+
+                return [
+                    'code' => $group->first()->asset_cat,
+                    'name' => $categoryNames[$group->first()->asset_cat] ?? $group->first()->asset_cat,
+                    'count' => $count,
+                    'percentage' => $percentage,
+                    'total_amount' => $totalAmount,
+                ];
+            })
+            ->sortByDesc('count')
+            ->values();
+
+        $categoryDistribution = collect($categoryNames)
+            ->map(function ($name, $code) use ($categoryDistributionRaw) {
+                $existing = $categoryDistributionRaw->firstWhere('code', $code);
+
+                if ($existing) {
+                    return $existing;
+                }
+
+                return [
+                    'code' => $code,
+                    'name' => $name,
+                    'count' => 0,
+                    'percentage' => 0,
+                    'total_amount' => 0,
+                ];
+            })
+            ->values();
+
+        return view('dashboard', compact(
+            'users',
+            'inventories',
+            'departmentDistribution',
+            'deletedItems',
+            'categoryDistribution'
+        ));
     }
 } 

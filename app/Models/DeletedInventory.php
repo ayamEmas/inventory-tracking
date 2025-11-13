@@ -31,6 +31,7 @@ class DeletedInventory extends Model
         'description',
         'amount',
         'item',
+        'image',
         'id_tag',
         'deleted_at'
     ];

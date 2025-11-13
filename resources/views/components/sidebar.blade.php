@@ -24,7 +24,7 @@
             $canAccessInventory = in_array($role, ['Admin System', 'HOD', 'AM', 'OM', 'GM', 'MD', 'Staff']);
             $canAddItem = $canAccessInventory;
             $canAccessDisposal = $canAccessInventory;
-            $canViewDisposalOverview = in_array($role, ['Admin System', 'HOD', 'AM', 'OM', 'GM', 'MD']);
+            $canViewDisposalOverview = in_array($role, ['Admin System', 'HOD', 'AM', 'OM', 'GM', 'MD', 'Staff']);
             $canManageUsers = ($role === 'Admin System') || in_array($role, ['HOD', 'AM', 'OM', 'GM', 'MD']);
         @endphp
 
@@ -53,6 +53,20 @@
                         <a href="{{ route('itemForm') }}"
                            class="flex items-center rounded-md px-3 py-2 transition {{ request()->routeIs('itemForm') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700' }}">
                             Add Item
+                        </a>
+                    @endif
+                    @php
+                        $pendingSidebarCount = $sidebarPendingCount ?? App\Models\Inventory::where('check', 0)->count();
+                    @endphp
+                    @if(Auth::user()->department_id === 4)
+                        <a href="{{ route('inventory.verification') }}"
+                           class="flex items-center justify-between rounded-md px-3 py-2 transition {{ request()->routeIs('inventory.verification') ? 'bg-indigo-50 text-indigo-700' : 'text-gray-600 hover:bg-indigo-100 hover:text-indigo-700' }}">
+                            <span>Pending Verification</span>
+                            @if($pendingSidebarCount > 0)
+                                <span class="inline-flex items-center justify-center px-2 py-0.5 text-xs font-semibold bg-yellow-500 text-white rounded-full">
+                                    {{ $pendingSidebarCount }}
+                                </span>
+                            @endif
                         </a>
                     @endif
                 </div>

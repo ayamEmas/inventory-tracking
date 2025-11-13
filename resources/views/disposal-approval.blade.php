@@ -68,12 +68,16 @@
                 if ($disposal->remarks3 == 2 && $disposal->name3) {
                     $rejectedNames[] = $disposal->name3;
                 }
+                $hasRejection = count($rejectedNames) > 0;
             @endphp
 
             @php
                 $totalApprovals = 3; // Total number of supervisors
                 $approvedCount = count($approvedNames);
                 $isFullyApproved = $approvedCount === $totalApprovals;
+                $canEditDisposal = in_array(auth()->id(), array_filter([$disposal->supervisor1, $disposal->supervisor2, $disposal->supervisor3]))
+                    && !$isFullyApproved
+                    && !$hasRejection;
             @endphp
 
             @if($approvedCount > 0 && !$isFullyApproved)
@@ -112,7 +116,7 @@
                         </div>
                     </div>
                 </div>
-            @elseif(count($rejectedNames) > 0)
+            @elseif($hasRejection)
                 <div class="mb-6 bg-red-50 border border-red-200 rounded-lg p-4">
                     <div class="flex items-center">
                         <div class="flex-shrink-0">
@@ -284,6 +288,56 @@
                                 @endphp
                                 <p class="mt-1 text-sm text-gray-900">{{ $deletedAtFormatted }}</p>
                             </div>
+
+                        @if($disposal->picture_path)
+                            <div x-data="{ open: false }" class="pt-4 border-t border-gray-200">
+                                <button
+                                    type="button"
+                                    @click="open = !open"
+                                    class="w-full flex items-center justify-between px-4 py-3 text-sm font-semibold text-gray-800 uppercase tracking-wide bg-gray-50 rounded-md hover:bg-gray-100 transition-colors duration-200"
+                                >
+                                    <span class="flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 10l-3-3-3 3m6 4l-3 3-3-3" />
+                                        </svg>
+                                        Submitted Asset Picture
+                                    </span>
+                                    <svg x-show="!open" class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v12m6-6H6" />
+                                    </svg>
+                                    <svg x-show="open" class="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 12H6" />
+                                    </svg>
+                                </button>
+                                <div
+                                    x-show="open"
+                                    x-transition:enter="transition ease-out duration-300"
+                                    x-transition:enter-start="opacity-0 transform -translate-y-2"
+                                    x-transition:enter-end="opacity-100 transform translate-y-0"
+                                    x-transition:leave="transition ease-in duration-200"
+                                    x-transition:leave-start="opacity-100 transform translate-y-0"
+                                    x-transition:leave-end="opacity-0 transform -translate-y-2"
+                                    x-cloak
+                                    class="mt-4 bg-gray-50 p-4 rounded-md border border-dashed border-gray-200"
+                                >
+                                    <div class="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+                                        <div class="flex-1 flex justify-center">
+                                            <div class="max-w-md w-full">
+                                                <img src="{{ asset('storage/' . $disposal->picture_path) }}" alt="Asset picture" class="w-full max-h-56 object-contain rounded-md border border-gray-200 shadow-sm bg-white">
+                                            </div>
+                                        </div>
+                                        <div class="md:w-auto flex justify-center md:justify-end">
+                                            <a href="{{ asset('storage/' . $disposal->picture_path) }}" target="_blank" class="inline-flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white text-sm font-medium rounded-md hover:bg-indigo-700 transition-colors duration-200">
+                                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                                </svg>
+                                                View full size
+                                            </a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
                         </div>
                     </div>
                 </div>
@@ -294,129 +348,348 @@
                         <h3 class="text-lg font-semibold text-gray-800">Disposal Information</h3>
                     </div>
                     <div class="p-6">
-                        <div class="space-y-4">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Registration Serial Number</label>
-                                    <p class="mt-1 text-sm text-gray-900 font-medium">{{ $disposal->registrationSerialNum }}</p>
+                        @if($errors->has('update-error'))
+                            <div class="mb-4 rounded-lg border border-red-200 bg-red-50 px-4 py-3 text-sm text-red-700">
+                                {{ $errors->first('update-error') }}
+                            </div>
+                        @endif
+
+                        @if(session('success'))
+                            <div class="mb-4 rounded-lg border border-green-200 bg-green-50 px-4 py-3 text-sm text-green-700">
+                                {{ session('success') }}
+                            </div>
+                        @endif
+
+                        @if($canEditDisposal)
+                            @php
+                                $acquisitionDateInput = old('acquisitionDate', optional($disposal->acquisitionDate)->format('Y-m-d'));
+                            @endphp
+
+                            <form action="{{ route('disposal.update', $disposal->id) }}" method="POST" enctype="multipart/form-data" class="space-y-4">
+                                @csrf
+                                @method('PUT')
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">ID Tag</label>
+                                        <p class="mt-1 text-sm text-gray-900 font-medium">{{ $disposal->id_tag }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Registration Serial Number</label>
+                                        <p class="mt-1 text-sm text-gray-900 font-medium">{{ $disposal->registrationSerialNum }}</p>
+                                    </div>
                                 </div>
+
+                                <div>
+                                    <label for="assetDescrip" class="block text-sm font-medium text-gray-600">Asset Description</label>
+                                    <input
+                                        type="text"
+                                        id="assetDescrip"
+                                        name="assetDescrip"
+                                        value="{{ old('assetDescrip', $disposal->assetDescrip) }}"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        required
+                                    >
+                                    @error('assetDescrip')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="acquisitionDate" class="block text-sm font-medium text-gray-600">Acquisition Date</label>
+                                        <input
+                                            type="date"
+                                            id="acquisitionDate"
+                                            name="acquisitionDate"
+                                            value="{{ $acquisitionDateInput }}"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            required
+                                        >
+                                        @error('acquisitionDate')
+                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="assetAge" class="block text-sm font-medium text-gray-600">Asset Age (years)</label>
+                                        <input
+                                            type="number"
+                                            id="assetAge"
+                                            name="assetAge"
+                                            min="0"
+                                            value="{{ old('assetAge', $disposal->assetAge) }}"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            required
+                                        >
+                                        @error('assetAge')
+                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <div>
+                                        <label for="oriCost" class="block text-sm font-medium text-gray-600">Original Cost (RM)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            id="oriCost"
+                                            name="oriCost"
+                                            value="{{ old('oriCost', $disposal->oriCost) }}"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            required
+                                        >
+                                        @error('oriCost')
+                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                    <div>
+                                        <label for="currentValue" class="block text-sm font-medium text-gray-600">Current Value (RM)</label>
+                                        <input
+                                            type="number"
+                                            step="0.01"
+                                            min="0"
+                                            id="currentValue"
+                                            name="currentValue"
+                                            value="{{ old('currentValue', $disposal->currentValue) }}"
+                                            class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                            required
+                                        >
+                                        @error('currentValue')
+                                            <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                        @enderror
+                                    </div>
+                                </div>
+
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div>
+                                    <label for="stateAsset" class="block text-sm font-medium text-gray-600">State of Asset</label>
+                                    @php
+                                        $stateAssetValue = old('stateAsset', $disposal->stateAsset);
+                                    @endphp
+                                    <select
+                                        id="stateAsset"
+                                        name="stateAsset"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        required
+                                    >
+                                        <option value="">Select State</option>
+                                        <option value="Good" {{ $stateAssetValue === 'Good' ? 'selected' : '' }}>Good (Baik)</option>
+                                        <option value="Poor" {{ $stateAssetValue === 'Poor' ? 'selected' : '' }}>Poor (Kurang Baik)</option>
+                                        <option value="Damaged" {{ $stateAssetValue === 'Damaged' ? 'selected' : '' }}>Damaged (Rosak)</option>
+                                        <option value="Obsolete" {{ $stateAssetValue === 'Obsolete' ? 'selected' : '' }}>Obsolete (Tidak Digunakan Lagi / Usang)</option>
+                                    </select>
+                                    @error('stateAsset')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <div>
+                                    <label for="disposalMethod" class="block text-sm font-medium text-gray-600">Disposal Method</label>
+                                    @php
+                                        $disposalMethodValue = old('disposalMethod', $disposal->disposalMethod);
+                                    @endphp
+                                    <select
+                                        id="disposalMethod"
+                                        name="disposalMethod"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        required
+                                    >
+                                        <option value="">Select Method</option>
+                                        <option value="Sale" {{ $disposalMethodValue === 'Sale' ? 'selected' : '' }}>Sale</option>
+                                        <option value="Donation" {{ $disposalMethodValue === 'Donation' ? 'selected' : '' }}>Donation</option>
+                                        <option value="Destruction" {{ $disposalMethodValue === 'Destruction' ? 'selected' : '' }}>Destruction</option>
+                                        <option value="Transfer" {{ $disposalMethodValue === 'Transfer' ? 'selected' : '' }}>Transfer</option>
+                                        <option value="Scrap" {{ $disposalMethodValue === 'Scrap' ? 'selected' : '' }}>Scrap</option>
+                                    </select>
+                                    @error('disposalMethod')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                </div>
+
+                                <div>
+                                    <label for="justification" class="block text-sm font-medium text-gray-600">Justification</label>
+                                    <textarea
+                                        id="justification"
+                                        name="justification"
+                                        rows="3"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                        required
+                                    >{{ old('justification', $disposal->justification) }}</textarea>
+                                    @error('justification')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="notes" class="block text-sm font-medium text-gray-600">Notes (optional)</label>
+                                    <textarea
+                                        id="notes"
+                                        name="notes"
+                                        rows="3"
+                                        class="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"
+                                    >{{ old('notes', $disposal->notes) }}</textarea>
+                                    @error('notes')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                </div>
+
+                                <div>
+                                    <label for="picture" class="block text-sm font-medium text-gray-600">Update Picture</label>
+                                    <input
+                                        type="file"
+                                        id="picture"
+                                        name="picture"
+                                        accept="image/*"
+                                        class="mt-1 block w-full text-sm text-gray-900 file:mr-4 file:rounded-md file:border-0 file:bg-indigo-600 file:px-4 file:py-2 file:text-sm file:font-semibold file:text-white hover:file:bg-indigo-700"
+                                    >
+                                    <p class="mt-1 text-xs text-gray-500">Leave blank to keep the existing picture.</p>
+                                    @error('picture')
+                                        <p class="mt-1 text-xs text-red-600">{{ $message }}</p>
+                                    @enderror
+                                    @if($disposal->picture_path)
+                                        <a href="{{ asset('storage/' . $disposal->picture_path) }}" target="_blank" class="mt-2 inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+                                            View current picture
+                                        </a>
+                                    @endif
+                                </div>
+
+                                <div class="flex items-center justify-end pt-2">
+                                    <button type="submit" class="inline-flex items-center px-4 py-2 bg-indigo-600 border border-transparent rounded-md font-semibold text-xs text-white uppercase tracking-widest hover:bg-indigo-500 active:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 transition ease-in-out duration-150">
+                                        Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        @else
+                            <div class="space-y-4">
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">ID Tag</label>
+                                        <p class="mt-1 text-sm text-gray-900 font-medium">{{ $disposal->id_tag }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Registration Serial Number</label>
+                                        <p class="mt-1 text-sm text-gray-900 font-medium">{{ $disposal->registrationSerialNum }}</p>
+                                    </div>
+                                </div>
+                                
                                 <div>
                                     <label class="block text-sm font-medium text-gray-600">Asset Description</label>
                                     <p class="mt-1 text-sm text-gray-900">{{ $disposal->assetDescrip }}</p>
                                 </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Acquisition Date</label>
+                                        @php
+                                            $acquisitionDateValue = data_get($disposal, 'acquisitionDate');
+                                            $acquisitionDateFormatted = $acquisitionDateValue
+                                                ? \Illuminate\Support\Carbon::parse($acquisitionDateValue)->format('M d, Y')
+                                                : 'N/A';
+                                        @endphp
+                                        <p class="mt-1 text-sm text-gray-900">{{ $acquisitionDateFormatted }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Asset Age</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $disposal->assetAge }} years</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Original Cost</label>
+                                        <p class="mt-1 text-sm text-gray-900 font-medium">RM {{ number_format($disposal->oriCost, 2) }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Current Value</label>
+                                        <p class="mt-1 text-sm text-gray-900">RM {{ number_format($disposal->currentValue, 2) }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div class="grid grid-cols-2 gap-4">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">State of Asset</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $disposal->stateAsset }}</p>
+                                    </div>
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Disposal Method</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $disposal->disposalMethod }}</p>
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <label class="block text-sm font-medium text-gray-600">Justification</label>
+                                    <p class="mt-1 text-sm text-gray-900">{{ $disposal->justification }}</p>
+                                </div>
+                                
+                                @if($disposal->notes)
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Notes</label>
+                                        <p class="mt-1 text-sm text-gray-900">{{ $disposal->notes }}</p>
+                                    </div>
+                                @endif
                             </div>
-                            
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Acquisition Date</label>
-                                    @php
-                                        $acquisitionDateValue = data_get($disposal, 'acquisitionDate');
-                                        $acquisitionDateFormatted = $acquisitionDateValue
-                                            ? \Illuminate\Support\Carbon::parse($acquisitionDateValue)->format('M d, Y')
-                                            : 'N/A';
-                                    @endphp
-                                    <p class="mt-1 text-sm text-gray-900">{{ $acquisitionDateFormatted }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Asset Age</label>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $disposal->assetAge }} years</p>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Original Cost</label>
-                                    <p class="mt-1 text-sm text-gray-900 font-medium">RM {{ number_format($disposal->oriCost, 2) }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Current Value</label>
-                                    <p class="mt-1 text-sm text-gray-900">RM {{ number_format($disposal->currentValue, 2) }}</p>
-                                </div>
-                            </div>
-                            
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">State of Asset</label>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $disposal->stateAsset }}</p>
-                                </div>
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Disposal Method</label>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $disposal->disposalMethod }}</p>
-                                </div>
-                            </div>
-                            
-                            <div>
-                                <label class="block text-sm font-medium text-gray-600">Justification</label>
-                                <p class="mt-1 text-sm text-gray-900">{{ $disposal->justification }}</p>
-                            </div>
-                            
-                            @if($disposal->notes)
-                                <div>
-                                    <label class="block text-sm font-medium text-gray-600">Notes</label>
-                                    <p class="mt-1 text-sm text-gray-900">{{ $disposal->notes }}</p>
-                                </div>
-                            @endif
+                        @endif
 
-                            @php
-                                $approvals = [
-                                    ['remarks' => $disposal->remarks1, 'name' => $disposal->name1, 'label' => 'Approval 1'],
-                                    ['remarks' => $disposal->remarks2, 'name' => $disposal->name2, 'label' => 'Approval 2'],
-                                    ['remarks' => $disposal->remarks3, 'name' => $disposal->name3, 'label' => 'Approval 3'],
-                                ];
-                                $hasApproval = collect($approvals)->contains(fn($a) => $a['remarks'] == 1);
-                            @endphp
+                        @php
+                            $approvals = [
+                                ['remarks' => $disposal->remarks1, 'name' => $disposal->name1, 'label' => 'Approval 1'],
+                                ['remarks' => $disposal->remarks2, 'name' => $disposal->name2, 'label' => 'Approval 2'],
+                                ['remarks' => $disposal->remarks3, 'name' => $disposal->name3, 'label' => 'Approval 3'],
+                            ];
+                            $hasApproval = collect($approvals)->contains(fn($a) => $a['remarks'] == 1);
+                        @endphp
 
-                            @if(!$hasApproval)
-                                <div class="border-t border-gray-200 pt-4">
-                                    <h4 class="text-md font-medium text-gray-800 mb-3">Approval Details</h4>
-                                    <div class="space-y-3">
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-600">Status</label>
+                        @if(!$hasApproval)
+                            <div class="border-t border-gray-200 pt-4 mt-6">
+                                <h4 class="text-md font-medium text-gray-800 mb-3">Approval Details</h4>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="block text-sm font-medium text-gray-600">Status</label>
+                                        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
+                                            Pending
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        @endif
+
+                        @foreach($approvals as $index => $approval)
+                            <div class="border-t border-gray-200 pt-4 mt-6">
+                                <h4 class="text-md font-medium text-gray-800 mb-3">{{ $approval['label'] }} Details</h4>
+                                <div class="space-y-3">
+                                    <div class="grid grid-cols-2 gap-4">
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-600">Reviewed By</label>
+                                            <p class="mt-1 text-sm text-gray-900">
+                                                {{ $approval['name'] ?? '-' }}
+                                            </p>
+                                        </div>
+                                        <div>
+                                            <label class="block text-sm font-medium text-gray-600">Status</label>
+                                            @if($approval['remarks'] == 1)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                                                    Approved
+                                                </span>
+                                            @elseif($approval['remarks'] == 2)
+                                                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
+                                                    Rejected
+                                                </span>
+                                            @else
                                                 <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
                                                     Pending
                                                 </span>
-                                            </div>
+                                            @endif
                                         </div>
                                     </div>
                                 </div>
-                            @endif
-
-                            @foreach($approvals as $index => $approval)
-                                <div class="border-t border-gray-200 pt-4">
-                                    <h4 class="text-md font-medium text-gray-800 mb-3">{{ $approval['label'] }} Details</h4>
-                                    <div class="space-y-3">
-                                        <div class="grid grid-cols-2 gap-4">
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-600">Reviewed By</label>
-                                                <p class="mt-1 text-sm text-gray-900">
-                                                    {{ $approval['name'] ?? '-' }}
-                                                </p>
-                                            </div>
-                                            <div>
-                                                <label class="block text-sm font-medium text-gray-600">Status</label>
-                                                @if($approval['remarks'] == 1)
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                                                        Approved
-                                                    </span>
-                                                @elseif($approval['remarks'] == 2)
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-red-100 text-red-800">
-                                                        Rejected
-                                                    </span>
-                                                @else
-                                                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-yellow-100 text-yellow-800">
-                                                        Pending
-                                                    </span>
-                                                @endif
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            @endforeach
-                        </div>
+                            </div>
+                        @endforeach
                     </div>
                 </div>
             </div>
+
 
             <!-- Approval Form (only show if pending) -->
             @if(auth()->id() == 5)
@@ -536,26 +809,5 @@
                 @endif
             @endif
         </div>
-
-        @if($disposal->picture_path)
-            <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 mt-10">
-                <div class="bg-white rounded-lg shadow-md overflow-hidden">
-                    <div class="px-4 py-2 border-b border-gray-200 flex items-center justify-between">
-                        <h3 class="text-sm font-semibold text-gray-800 uppercase tracking-wide">Submitted Asset Picture</h3>
-                        <a href="{{ asset('storage/' . $disposal->picture_path) }}" target="_blank" class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
-                            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                            </svg>
-                            View full size
-                        </a>
-                    </div>
-                    <div class="p-3 bg-gray-50 flex justify-center">
-                        <div class="max-w-md w-full">
-                            <img src="{{ asset('storage/' . $disposal->picture_path) }}" alt="Asset picture" class="w-full max-h-56 object-contain rounded-md border border-gray-200 shadow-sm bg-white">
-                        </div>
-                    </div>
-                </div>
-            </div>
-        @endif
     </div>
 </x-app-layout> 

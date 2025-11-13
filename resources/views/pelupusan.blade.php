@@ -279,6 +279,13 @@
                                             </div>
                                             
                                             <div>
+                                                <x-input-label for="id_tag" value="ID Tag" />
+                                                <x-text-input id="id_tag" name="id_tag" type="text" 
+                                                    class="mt-1 block w-full bg-gray-200 border-gray-300" value="{{ old('id_tag', $inventory->id_tag) }}" readonly required />
+                                                <x-input-error :messages="$errors->get('id_tag')" class="mt-2" />
+                                            </div>
+                                            
+                                            <div>
                                                 <x-input-label for="assetDescrip" value="Asset Description" />
                                                 <x-text-input id="assetDescrip" name="assetDescrip" type="text" 
                                                     class="mt-1 block w-full bg-gray-200 border-gray-300" value="{{ old('assetDescrip', $inventory->description) }}" readonly required />
@@ -528,6 +535,7 @@
                                             <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Inventory Details</h3>
                                             <ul class="text-gray-800 space-y-1">
                                                 <li><span class="font-medium text-gray-500">Item:</span> {{ $record?->item }}</li>
+                                                <li><span class="font-medium text-gray-500">ID Tag:</span> {{ $record?->id_tag }}</li>
                                                 <li><span class="font-medium text-gray-500">Description:</span> {{ $record?->description }}</li>
                                                 <li><span class="font-medium text-gray-500">Quantity:</span> {{ $record?->nos }}</li>
                                                 <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format(optional($record)->amount ?? 0, 2) }}</li>
@@ -544,6 +552,7 @@
                                          <div>
                                              <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Disposal Record</h3>
                                              <ul class="text-gray-800 space-y-1">
+                                                 <li><span class="font-medium text-gray-500">ID Tag:</span> {{ $disposalData->id_tag }}</li>
                                                  <li><span class="font-medium text-gray-500">Registration Serial Number:</span> {{ $disposalData->registrationSerialNum }}</li>
                                                  <li><span class="font-medium text-gray-500">Asset Description:</span> {{ $disposalData->assetDescrip }}</li>
                                                  <li><span class="font-medium text-gray-500">Acquisition Date:</span> {{ $disposalData->acquisitionDate }}</li>
@@ -597,6 +606,7 @@
                                             <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Inventory Details</h3>
                                             <ul class="text-gray-800 space-y-1">
                                                 <li><span class="font-medium text-gray-500">Item:</span> {{ $record?->item }}</li>
+                                                <li><span class="font-medium text-gray-500">ID Tag:</span> {{ $record?->id_tag }}</li>
                                                 <li><span class="font-medium text-gray-500">Description:</span> {{ $record?->description }}</li>
                                                 <li><span class="font-medium text-gray-500">Quantity:</span> {{ $record?->nos }}</li>
                                                 <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format(optional($record)->amount ?? 0, 2) }}</li>
@@ -613,6 +623,7 @@
                                         <div>
                                             <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Disposal Record</h3>
                                             <ul class="text-gray-800 space-y-1">
+                                                <li><span class="font-medium text-gray-500">ID Tag:</span> {{ $disposalData->id_tag }}</li>
                                                 <li><span class="font-medium text-gray-500">Registration Serial Number:</span> {{ $disposalData->registrationSerialNum }}</li>
                                                 <li><span class="font-medium text-gray-500">Asset Description:</span> {{ $disposalData->assetDescrip }}</li>
                                                 <li><span class="font-medium text-gray-500">Acquisition Date:</span> {{ $disposalData->acquisitionDate }}</li>
@@ -808,6 +819,7 @@
                                             <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Inventory Details</h3>
                                             <ul class="text-gray-800 space-y-1">
                                                 <li><span class="font-medium text-gray-500">Item:</span> {{ $record?->item }}</li>
+                                                <li><span class="font-medium text-gray-500">ID Tag:</span> {{ $record?->id_tag }}</li>
                                                 <li><span class="font-medium text-gray-500">Description:</span> {{ $record?->description }}</li>
                                                 <li><span class="font-medium text-gray-500">Quantity:</span> {{ $record?->nos }}</li>
                                                 <li><span class="font-medium text-gray-500">Amount:</span> RM {{ number_format(optional($record)->amount ?? 0, 2) }}</li>
@@ -824,6 +836,7 @@
                                         <div>
                                             <h3 class="font-semibold text-gray-700 mb-2 border-b pb-1">Disposal Record</h3>
                                             <ul class="text-gray-800 space-y-1">
+                                                <li><span class="font-medium text-gray-500">ID Tag:</span> {{ $disposalData->id_tag }}</li>
                                                 <li><span class="font-medium text-gray-500">Registration Serial Number:</span> {{ $disposalData->registrationSerialNum }}</li>
                                                 <li><span class="font-medium text-gray-500">Asset Description:</span> {{ $disposalData->assetDescrip }}</li>
                                                 <li><span class="font-medium text-gray-500">Acquisition Date:</span> {{ $disposalData->acquisitionDate }}</li>

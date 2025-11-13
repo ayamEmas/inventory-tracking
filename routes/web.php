@@ -21,6 +21,9 @@ Route::get('/inventory', [InventoryController::class, 'index'])->middleware(['au
 # Form for inventory
 Route::get('/itemForm', [InventoryController::class, 'create'])->middleware(['auth', 'verified'])->name('itemForm');
 Route::post('/itemForm', [InventoryController::class, 'store'])->middleware(['auth', 'verified'])->name('itemForm.store');
+Route::get('/inventory/verification', [InventoryController::class, 'verification'])->middleware(['auth', 'verified'])->name('inventory.verification');
+Route::post('/inventory/verification/bulk', [InventoryController::class, 'markVerifiedBulk'])->middleware(['auth', 'verified'])->name('inventory.verification.bulk');
+Route::post('/inventory/verification/{inventory}', [InventoryController::class, 'markVerified'])->middleware(['auth', 'verified'])->name('inventory.verification.mark');
 
 Route::get('/inventory/{id}/edit', [InventoryController::class, 'edit'])->middleware(['auth', 'verified'])->name('inventories.edit');
 Route::put('/inventory/{id}', [InventoryController::class, 'update'])->middleware(['auth', 'verified'])->name('inventories.update');
@@ -54,6 +57,7 @@ Route::post('/pelupusan/store', [DisposalController::class, 'store'])->middlewar
 
 # Disposal approval page
 Route::get('/disposal/approval/{id}', [DisposalController::class, 'showApproval'])->middleware(['auth', 'verified'])->name('disposal.approval');
+Route::put('/disposal/{id}', [DisposalController::class, 'updateDisposal'])->middleware(['auth', 'verified'])->name('disposal.update');
 Route::post('/disposal/approve/{id}', [DisposalController::class, 'approve'])->middleware(['auth', 'verified'])->name('disposal.approve');
 Route::post('/disposal/approve2/{id}', [DisposalController::class, 'approve2'])->middleware(['auth', 'verified'])->name('disposal.approve2');
 Route::post('/disposal/approve3/{id}', [DisposalController::class, 'approve3'])->middleware(['auth', 'verified'])->name('disposal.approve3');

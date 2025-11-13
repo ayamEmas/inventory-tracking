@@ -26,7 +26,7 @@
                          x-transition:enter-end="opacity-100 transform translate-y-0"
                          class="flex items-center justify-between mb-6">
                         <div class="flex items-center gap-2">
-                            <a href="{{ route('inventory') }}" class="inline-flex items-center gap-2 bg-red-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-red-700 transition-all duration-300 hover:scale-105">
+                            <a onclick="history.back()" class="inline-flex items-center gap-2 bg-red-600 text-white text-sm px-6 py-2.5 rounded-lg hover:bg-red-700 transition-all duration-300 hover:scale-105 cursor-pointer">
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18" />
                                 </svg>

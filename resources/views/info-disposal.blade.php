@@ -191,7 +191,7 @@
                             @forelse($disposals as $disposal)
                                 <tr class="hover:bg-gray-50 transition-colors duration-200">
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900 font-medium">
-                                        {{ $disposal->deletedInventory->id_tag ?? $disposal->registrationSerialNum ?? '-' }}
+                                        {{ optional($disposal->deletedInventory)->id_tag ?? optional($disposal->inventory)->id_tag ?? $disposal->id_tag ?? '-' }}
                                     </td>
                                     <td class="px-6 py-4 text-sm text-gray-900">{{ $disposal->assetDescrip }}</td>
                                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ $disposal->acquisitionDate->format('M d, Y') }}</td>
@@ -275,7 +275,9 @@
                             <div class="flex justify-between items-start mb-3">
                                 <div>
                                     <h4 class="font-medium text-gray-900">{{ $disposal->assetDescrip }}</h4>
-                                    <p class="text-sm text-gray-600">ID Tag: <span class="font-medium text-gray-900">{{ $disposal->deletedInventory->id_tag ?? $disposal->registrationSerialNum ?? '-' }}</span></p>
+                                    <p class="text-sm text-gray-600">ID Tag: <span class="font-medium text-gray-900">
+                                        {{ optional($disposal->deletedInventory)->id_tag ?? optional($disposal->inventory)->id_tag ?? $disposal->id_tag ?? '-' }}
+                                    </span></p>
                                 </div>
                                 <div>
                                     @if($disposal->remarks1 == 1)

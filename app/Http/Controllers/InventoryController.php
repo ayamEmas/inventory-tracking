@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Inventory;
 use App\Models\Department;
+use App\Models\Disposal;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
 use Endroid\QrCode\Color\Color;
@@ -19,7 +20,15 @@ use Illuminate\Support\Facades\Storage;
 class InventoryController extends Controller
 {
     public function index (Request $request) {
-        $departments = Department::all();
+        $categoryNames = [
+            'B' => 'Building',
+            'MV' => 'Motor Vehicle',
+            'M' => 'Machinery',
+            'FF' => 'Furniture & Fitting',
+            'SE' => 'Site Equipment',
+            'OE' => 'Office Equipment',
+            'C' => 'Computer',
+        ];
 
         $query = Inventory::with('department');
 
@@ -31,10 +40,8 @@ class InventoryController extends Controller
             $query->where('id_tag', 'like', '%' . $request->id_tag_filter . '%');
         }
 
-        if ($request->filled('department_filter')) {
-            $query->whereHas('department', function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->department_filter . '%');
-            });
+        if ($request->filled('category_filter')) {
+            $query->where('asset_cat', $request->category_filter);
         }
 
         if ($request->filled('year_filter')) {
@@ -45,33 +52,83 @@ class InventoryController extends Controller
             ->orderByDesc('created_at')
             ->get();
 
-        // Define department hierarchy for sorting
-        $departmentHierarchy = [
-            'Human Resources' => 1,
-            'Finance' => 2,
-            'Contract' => 3,
-            'Operation' => 4,
-            'Information Technology' => 5,
-            'None' => 6
-        ];
+        $serialToIdTag = $inventories->pluck('id_tag', 'serial_num')->filter()->all();
 
-        // Get current user's department
-        $currentUserDepartment = auth()->user()->department->name ?? 'None';
+        foreach ($serialToIdTag as $serial => $idTag) {
+            Disposal::where('registrationSerialNum', $serial)
+                ->where(function ($query) use ($idTag) {
+                    $query->whereNull('id_tag')
+                        ->orWhere('id_tag', '')
+                        ->orWhere('id_tag', '!=', $idTag);
+                })
+                ->update(['id_tag' => $idTag]);
+        }
 
-        // Sort inventories by department hierarchy with user's department first
-        $inventories = $inventories->sortBy(function ($inventory) use ($departmentHierarchy, $currentUserDepartment) {
-            $deptName = $inventory->department->name ?? 'None';
-            
-            // If it's the user's own department, give it priority 0 (highest)
-            if ($deptName === $currentUserDepartment) {
-                return 0;
+        $idTags = array_values(array_filter($serialToIdTag));
+
+        $latestDisposalsCollection = Disposal::query()
+            ->whereIn('id_tag', $idTags)
+            ->orderByDesc('created_at')
+            ->get();
+
+        $latestByIdTag = [];
+
+        foreach ($latestDisposalsCollection as $disposal) {
+            if (!empty($disposal->id_tag) && !isset($latestByIdTag[$disposal->id_tag])) {
+                $latestByIdTag[$disposal->id_tag] = $disposal;
             }
-            
-            // Otherwise use the hierarchy order
-            return $departmentHierarchy[$deptName] ?? 999;
-        })->values(); // Reset array keys
+        }
 
-        return view('inventory', compact('departments', 'inventories'));
+        $inventories->each(function ($inventory) use ($latestByIdTag) {
+            $inventory->latest_disposal = $latestByIdTag[$inventory->id_tag] ?? null;
+        });
+
+        $groupedByCategory = $inventories->groupBy('asset_cat')->map(function ($items, $code) use ($categoryNames) {
+            $name = $categoryNames[$code] ?? $code;
+            $pendingVerificationCount = $items->where('check', 0)->count();
+            $verifiedCount = $items->where('check', 1)->count();
+            $pendingDisposalCount = $items->filter(function ($inventory) {
+                $disposal = $inventory->latest_disposal;
+
+                if (!$disposal) {
+                    return false;
+                }
+
+                $remarks = [
+                    $disposal->remarks1,
+                    $disposal->remarks2,
+                    $disposal->remarks3,
+                ];
+
+                if (in_array(2, $remarks, true)) {
+                    return false;
+                }
+
+                return collect($remarks)->contains(function ($remark) {
+                    return $remark === null || $remark === 0;
+                });
+            })->count();
+
+            return [
+                'code' => $code,
+                'name' => $name,
+                'items' => $items,
+                'total' => $items->count(),
+                'pending_verification' => $pendingVerificationCount,
+                'pending_disposal' => $pendingDisposalCount,
+                'verified' => $verifiedCount,
+            ];
+        })->sortBy('name')->values();
+
+        $pendingCount = Inventory::where('check', 0)->count();
+
+        return view('inventory', [
+            'inventories' => $inventories,
+            'categoryGroups' => $groupedByCategory,
+            'categoryNames' => $categoryNames,
+            'pendingCount' => $pendingCount,
+            'selectedCategory' => $request->category_filter,
+        ]);
     }
 
     public function store (Request $request) {
@@ -127,6 +184,7 @@ class InventoryController extends Controller
 
         // Add id_tag to validated data
         $validated['id_tag'] = $idTag;
+        $validated['check'] = 0;
 
         // Handle image upload with id_tag and date as filename
         if ($request->hasFile('image')) {
@@ -287,9 +345,67 @@ class InventoryController extends Controller
             \Log::info('Update: No image file found in request');
         }
 
+        $validated['check'] = $inventory->check;
+
         $inventory->update($validated);
 
         return redirect()->route('inventory')->with('success', 'Inventory updated successfully!');
+    }
+
+    public function verification()
+    {
+        $user = auth()->user();
+
+        if ($user->department_id !== 4) {
+            abort(403, 'Only Finance Department staff can access this page.');
+        }
+
+        $pendingInventories = Inventory::with('department')
+            ->where('check', 0)
+            ->orderByDesc('created_at')
+            ->get();
+
+        return view('inventory-verification', compact('pendingInventories'));
+    }
+
+    public function markVerified(Inventory $inventory)
+    {
+        $user = auth()->user();
+
+        if ($user->department_id !== 4) {
+            abort(403, 'Only Finance Department staff can verify inventories.');
+        }
+
+        if ($inventory->check === 1) {
+            return redirect()->route('inventory.verification')->with('info', 'This inventory is already verified.');
+        }
+
+        $inventory->update(['check' => 1]);
+
+        return redirect()->route('inventory.verification')->with('success', 'Inventory verified successfully.');
+    }
+
+    public function markVerifiedBulk(Request $request)
+    {
+        $user = auth()->user();
+
+        if ($user->department_id !== 4) {
+            abort(403, 'Only Finance Department staff can verify inventories.');
+        }
+
+        $ids = collect($request->input('inventory_ids', []))->filter()->unique();
+
+        if ($ids->isEmpty()) {
+            return redirect()->route('inventory.verification')->with('info', 'Please select at least one inventory to verify.');
+        }
+
+        $updated = Inventory::whereIn('id', $ids)->where('check', 0)->update(['check' => 1]);
+
+        if ($updated === 0) {
+            return redirect()->route('inventory.verification')->with('info', 'Selected inventories were already verified.');
+        }
+
+        return redirect()->route('inventory.verification')->with('success', 'Selected inventories verified successfully.');
     }
 
     public function downloadQr($id)
@@ -330,6 +446,10 @@ class InventoryController extends Controller
                     $q->where('name', $value);
                 });
                 $title = "Inventory - {$value} Department";
+                break;
+            case 'category':
+                $query->where('asset_cat', $value);
+                $title = "Inventory - Category {$value}";
                 break;
             case 'year':
                 $query->whereYear('date', $value);
@@ -456,65 +576,109 @@ class InventoryController extends Controller
 
     public function deletedItems(Request $request)
     {
-        $query = DeletedInventory::with('department');
+        $categoryNames = [
+            'B' => 'Building',
+            'MV' => 'Motor Vehicle',
+            'M' => 'Machinery',
+            'FF' => 'Furniture & Fitting',
+            'SE' => 'Site Equipment',
+            'OE' => 'Office Equipment',
+            'C' => 'Computer',
+        ];
+
+        $query = Disposal::with([
+            'deletedInventory.department',
+            'inventory.department',
+        ]);
 
         if ($request->filled('item_filter')) {
-            $query->where('item', 'like', '%' . $request->item_filter . '%');
+            $filter = $request->item_filter;
+            $query->where(function ($q) use ($filter) {
+                $q->where('assetDescrip', 'like', '%' . $filter . '%')
+                    ->orWhereHas('deletedInventory', function ($deleted) use ($filter) {
+                        $deleted->where('item', 'like', '%' . $filter . '%');
+                    })
+                    ->orWhereHas('inventory', function ($inventory) use ($filter) {
+                        $inventory->where('item', 'like', '%' . $filter . '%');
+                    });
+            });
         }
 
         if ($request->filled('id_tag_filter')) {
-            $query->where('id_tag', 'like', '%' . $request->id_tag_filter . '%');
+            $filter = $request->id_tag_filter;
+            $query->where(function ($q) use ($filter) {
+                $q->where('id_tag', 'like', '%' . $filter . '%')
+                    ->orWhereHas('deletedInventory', function ($deleted) use ($filter) {
+                        $deleted->where('id_tag', 'like', '%' . $filter . '%');
+                    })
+                    ->orWhereHas('inventory', function ($inventory) use ($filter) {
+                        $inventory->where('id_tag', 'like', '%' . $filter . '%');
+                    });
+            });
         }
 
-        if ($request->filled('department_filter')) {
-            $query->whereHas('department', function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->department_filter . '%');
+        if ($request->filled('category_filter')) {
+            $category = $request->category_filter;
+            $query->where(function ($q) use ($category) {
+                $q->whereHas('deletedInventory', function ($deleted) use ($category) {
+                    $deleted->where('asset_cat', $category);
+                })->orWhereHas('inventory', function ($inventory) use ($category) {
+                    $inventory->where('asset_cat', $category);
+                });
             });
         }
 
         if ($request->filled('year_filter')) {
-            $query->whereYear('date', $request->year_filter);
+            $year = $request->year_filter;
+            $query->where(function ($q) use ($year) {
+                $q->whereYear('acquisitionDate', $year)
+                    ->orWhereHas('deletedInventory', function ($deleted) use ($year) {
+                        $deleted->whereYear('date', $year);
+                    })
+                    ->orWhereHas('inventory', function ($inventory) use ($year) {
+                        $inventory->whereYear('date', $year);
+                    });
+            });
         }
 
-        $deletedItems = $query->orderBy('deleted_at', 'desc')->get();
-        
-        // Load disposal records for each deleted item
-        $deletedItems->each(function ($item) {
-            $disposal = \App\Models\Disposal::where('registrationSerialNum', $item->serial_num)
-                ->orWhere('registrationSerialNum', $item->id_tag)
-                ->first();
-            $item->disposal = $disposal;
-        });
+        $disposals = $query->orderByDesc('created_at')->get();
 
-        // Define department hierarchy for sorting
-        $departmentHierarchy = [
-            'Human Resources' => 1,
-            'Finance' => 2,
-            'Contract' => 3,
-            'Operation' => 4,
-            'Information Technology' => 5,
-            'None' => 6
-        ];
+        $categoryGroups = $disposals
+            ->groupBy(function ($disposal) {
+                $source = $disposal->deletedInventory ?? $disposal->inventory;
+                return $source->asset_cat ?? null;
+            })
+            ->map(function ($items, $code) use ($categoryNames) {
+                $name = $categoryNames[$code] ?? ($code ?: 'Unknown');
+                $pendingCount = $items->filter(function ($disposal) {
+                    $remarks = [
+                        $disposal->remarks1,
+                        $disposal->remarks2,
+                        $disposal->remarks3,
+                    ];
 
-        // Get current user's department
-        $currentUserDepartment = auth()->user()->department->name ?? 'None';
+                    $isRejected = in_array(2, $remarks, true);
+                    $isApproved = collect($remarks)->every(fn ($remark) => $remark === 1);
 
-        // Sort deleted items by department hierarchy with user's department first
-        $deletedItems = $deletedItems->sortBy(function ($item) use ($departmentHierarchy, $currentUserDepartment) {
-            $deptName = $item->department->name ?? 'None';
-            
-            // If it's the user's own department, give it priority 0 (highest)
-            if ($deptName === $currentUserDepartment) {
-                return 0;
-            }
-            
-            // Otherwise use the hierarchy order
-            return $departmentHierarchy[$deptName] ?? 999;
-        })->values(); // Reset array keys
-        
-        $departments = Department::all();
+                    return !$isRejected && !$isApproved;
+                })->count();
 
-        return view('deleted-inventory', compact('deletedItems', 'departments'));
+                return [
+                    'code' => $code ?: 'N/A',
+                    'name' => $name,
+                    'items' => $items,
+                    'total' => $items->count(),
+                    'pending' => $pendingCount,
+                ];
+            })
+            ->sortBy('name')
+            ->values();
+
+        return view('deleted-inventory', [
+            'categoryGroups' => $categoryGroups,
+            'categoryNames' => $categoryNames,
+            'selectedCategory' => $request->category_filter,
+        ]);
     }
 
     public function restore($id)
@@ -549,12 +713,13 @@ class InventoryController extends Controller
             'description' => $deletedItem->description,
             'amount' => $deletedItem->amount,
             'item' => $deletedItem->item,
+            'image' => $deletedItem->image,
             'id_tag' => $deletedItem->id_tag,
         ]);
 
         // Delete corresponding disposal record if it exists
-        $disposal = \App\Models\Disposal::where('registrationSerialNum', $deletedItem->serial_num)
-            ->orWhere('registrationSerialNum', $deletedItem->id_tag)
+        $disposal = \App\Models\Disposal::where('id_tag', $deletedItem->id_tag)
+            ->orWhere('registrationSerialNum', $deletedItem->serial_num)
             ->first();
             
         if ($disposal) {

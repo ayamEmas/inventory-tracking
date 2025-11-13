@@ -54,7 +54,7 @@
                             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                                 <!-- Purchase Date -->
                                 <div>
-                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="date">Purchase Date</label>
+                                    <label class="block text-sm font-medium text-gray-700 mb-1" for="date">Purchase Date (Enter 31/12/20XX if you don't know the exact date)</label>
                                     <input type="date" name="date" id="date" class="w-full rounded-lg border-gray-300 shadow-sm focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all duration-300" required>
                                 </div>
 

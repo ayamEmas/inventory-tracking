@@ -19,6 +19,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        view()->composer('components.sidebar', function ($view) {
+            if (auth()->check()) {
+                $pendingCount = \App\Models\Inventory::where('check', 0)->count();
+                $view->with('sidebarPendingCount', $pendingCount);
+            }
+        });
     }
 }
